@@ -59,3 +59,11 @@ auth:
   jwt_key:  "ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm4isbTs8y29Zs="
   expire:  86400  # 秒 (int64)
   algorithm: "Hash256" 
+
+# --------------------------------
+# Logger 配置
+# 对应 Go 结构体：Config.Auth
+# --------------------------------
+log:
+  level: "debug" # 日志级别, e.g., "debug", "info", "warn", "error"
+  format: "console" # // 日志格式, e.g., "json", "console"

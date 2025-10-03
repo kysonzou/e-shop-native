@@ -40,6 +40,11 @@ type Auth struct {
 
 }
 
+type Log struct {
+	Level string `mapstructure:"level"`
+	Format string `mapstructure:"format"`
+}
+
 
 type Server struct {
 	HTTP *Server_HTTP `mapstructure:"http"`
@@ -55,4 +60,5 @@ type Bootstrap struct {
 	Server *Server `mapstructure:"server"`
 	Data   *Data   `mapstructure:"data"`
 	Auth   *Auth   `mapstructure:"auth"`
+	Log    *Log    `mapstructure:"log"`
 }

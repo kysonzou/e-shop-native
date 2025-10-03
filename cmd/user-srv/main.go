@@ -14,11 +14,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
+	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -36,14 +36,16 @@ type App struct {
 	http *http.Server
 	conf_srv *conf.Server
 	bc *conf.Bootstrap
+	logger *zap.Logger
 }
 
-func NewApp(grpc *grpc.Server, http *http.Server, conf_server *conf.Server, bc *conf.Bootstrap) *App {
+func NewApp(grpc *grpc.Server, http *http.Server, conf_server *conf.Server, bc *conf.Bootstrap, logger *zap.Logger) *App {
 	return &App{
 		grpc: grpc,
 		http: http,
 		conf_srv: conf_server,
 		bc: bc,
+		logger: logger,
 	}
 }
 
@@ -116,29 +118,6 @@ func main() {
 		log.Printf("run app error: %v\n", err)
 	}
 
-}
-
-func LoadConfig() (*conf.Bootstrap, error) {
-	flag.Parse()
-
-	// viper
-	v := viper.New()
-	// 设置配置文件
-	v.SetConfigFile(flagconf) 
-	v.SetConfigType("yaml")
-
-	// 读取配置文件
-	if err := v.ReadInConfig(); err != nil {
-		return nil, err
-	}	
-
-	// 将配置 unmarshal 到 conf.Bootstrap
-	var bc conf.Bootstrap
-	if err := v.Unmarshal(&bc); err != nil {
-		return nil, err
-	}
-
-	return &bc, nil
 }
 
 func migrateDatabase(c *conf.Bootstrap) error {

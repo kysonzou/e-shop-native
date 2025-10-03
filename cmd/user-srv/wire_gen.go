@@ -8,7 +8,6 @@ package main
 
 import (
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
-	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"github.com/kyson/e-shop-native/internal/user-srv/service"
 	"github.com/kyson/e-shop-native/internal/user-srv/sever"
@@ -21,8 +20,8 @@ func InitializeApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	server := provideServerConfig(bootstrap)
-	confData := provideDataConfig(bootstrap)
+	server := ProvideServerConfig(bootstrap)
+	confData := ProvideDataConfig(bootstrap)
 	dataData, cleanup, err := data.NewData(confData)
 	if err != nil {
 		return nil, nil, err
@@ -32,18 +31,14 @@ func InitializeApp() (*App, func(), error) {
 	userServiceServer := service.NewUserService(userService)
 	grpcServer := sever.NewGRPCServer(server, userServiceServer)
 	httpServer := sever.NewHTTPServer(server)
-	app := NewApp(grpcServer, httpServer, server, bootstrap)
+	log := ProvideLogConfig(bootstrap)
+	logger, err := NewLogger(log)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	app := NewApp(grpcServer, httpServer, server, bootstrap, logger)
 	return app, func() {
 		cleanup()
 	}, nil
-}
-
-// wire.go:
-
-func provideServerConfig(c *conf.Bootstrap) *conf.Server {
-	return c.Server
-}
-
-func provideDataConfig(c *conf.Bootstrap) *conf.Data {
-	return c.Data
 }
