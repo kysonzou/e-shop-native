@@ -27,6 +27,16 @@ func NewUserRepo(data *Data) biz.UserRepo {
 	return &UserRepo{data: data}
 }
 
+func (po UserPO) toBizUser() *biz.User {
+	return &biz.User{
+		ID:       po.ID,
+		UserName: po.UserName,
+		Password: po.Password,
+		Phone:    po.Phone,
+		Email:    po.Email,
+	}	
+}
+
 func (r *UserRepo) Create(ctx context.Context, user *biz.User) (*biz.User, error) {
 	po := &UserPO{
 		UserName: user.UserName,
@@ -45,13 +55,7 @@ func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*biz.Us
 	if err := r.data.db.WithContext(ctx).Where("user_name = ?", username).First(&po).Error; err != nil {
 		return nil, err
 	}
-	return &biz.User{
-		ID:       po.ID,
-		UserName: po.UserName,
-		Password: po.Password,
-		Phone:    po.Phone,
-		Email:    po.Email,
-	}, nil		
+	return po.toBizUser(), nil		
 }
 
 func (r *UserRepo) FindByID(ctx context.Context, id uint) (*biz.User, error) {
@@ -59,11 +63,5 @@ func (r *UserRepo) FindByID(ctx context.Context, id uint) (*biz.User, error) {
 	if err := r.data.db.WithContext(ctx).First(&po, id).Error; err != nil {
 		return nil, err
 	}
-	return &biz.User{
-		ID:       po.ID,
-		UserName: po.UserName,
-		Password: po.Password,
-		Phone:    po.Phone,
-		Email:    po.Email,
-	}, nil
+	return po.toBizUser(), nil
 }

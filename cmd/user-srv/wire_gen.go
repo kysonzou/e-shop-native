@@ -16,18 +16,34 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeApp(s *conf.Server, d *conf.Data) (*App, func(), error) {
-	dataData, cleanup, err := data.NewData(d)
+func InitializeApp() (*App, func(), error) {
+	bootstrap, err := LoadConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+	server := provideServerConfig(bootstrap)
+	confData := provideDataConfig(bootstrap)
+	dataData, cleanup, err := data.NewData(confData)
 	if err != nil {
 		return nil, nil, err
 	}
 	userRepo := data.NewUserRepo(dataData)
 	userService := biz.NewUserUsecase(userRepo)
 	userServiceServer := service.NewUserService(userService)
-	server := sever.NewGRPCServer(s, userServiceServer)
-	httpServer := sever.NewHTTPServer(s)
-	app := NewApp(server, httpServer, s)
+	grpcServer := sever.NewGRPCServer(server, userServiceServer)
+	httpServer := sever.NewHTTPServer(server)
+	app := NewApp(grpcServer, httpServer, server, bootstrap)
 	return app, func() {
 		cleanup()
 	}, nil
+}
+
+// wire.go:
+
+func provideServerConfig(c *conf.Bootstrap) *conf.Server {
+	return c.Server
+}
+
+func provideDataConfig(c *conf.Bootstrap) *conf.Data {
+	return c.Data
 }

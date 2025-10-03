@@ -1,11 +1,9 @@
 package service
 
 import (
-	//"context"
-
 	"context"
-
 	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
+	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 )
 
@@ -48,7 +46,14 @@ func (s *UserService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.Logi
 	if err != nil {
 		return nil, err
 	}
+	// Token
+	token, err := auth.GenerateToken(uint(user.ID), user.UserName)
+	if err != nil{
+		return nil, err
+	}
+
 	return &v1.LoginReply{
+		Token: token,
 		User: &v1.User{
 			Id: int32(user.ID),
 			Username: user.UserName,
@@ -59,7 +64,14 @@ func (s *UserService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.Logi
 }
 
 func (s *UserService) GetMyProfile(ctx context.Context, req *v1.GetMyProfileRequest) (*v1.GetMyProfileReply, error){
-	user, err := s.uc.GetMyProfile(ctx, uint(1))
+	//这里少了一个验证Token，但是如果每个方法都自己验证的话，就是灾难性的，应该在之前就被验证
+	//读取Token
+	claims, ok := auth.FromContext(ctx)
+	if !ok {
+		return nil, auth.ErrTokenInvalid
+	}
+
+	user, err := s.uc.GetMyProfile(ctx, claims.Id)
 	if err != nil {
 		return nil, err
 	}

@@ -11,11 +11,23 @@ import (
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 )
 
+func provideServerConfig(c *conf.Bootstrap) *conf.Server {
+	return c.Server
+}
+
+func provideDataConfig(c *conf.Bootstrap) *conf.Data {
+	return c.Data
+}
 
 
-func InitializeApp(s *conf.Server, d *conf.Data) (*App, func(), error) {
+
+func InitializeApp() (*App, func(), error) {
 	panic(wire.Build(
+		provideDataConfig,
+		provideServerConfig,
+
 		NewApp,
+		LoadConfig,
 		biz.ProviderSet,
 		data.ProviderSet,
 		service.ProviderSet,

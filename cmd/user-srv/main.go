@@ -10,37 +10,40 @@ import (
 	"net/http"
 	"sync"
 
-	//"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	kratosconfig "github.com/go-kratos/kratos/v2/config"
-	kratosconfigfile "github.com/go-kratos/kratos/v2/config/file"
-	"github.com/kyson/e-shop-native/internal/user-srv/conf"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-)
 
+	"github.com/kyson/e-shop-native/internal/user-srv/data"
+	"github.com/kyson/e-shop-native/internal/user-srv/conf"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
 
 var flagconf string
 
-func init(){
+func init() {
 	//从终端读取config.yaml文件
 	flag.StringVar(&flagconf, "conf", "./configs/config.yaml", "config path, eg: -conf config.yaml")
-	
+
 }
 
-type App struct{
+type App struct {
 	grpc *grpc.Server
 	http *http.Server
-	conf *conf.Server
+	conf_srv *conf.Server
+	bc *conf.Bootstrap
 }
 
-func NewApp(grpc *grpc.Server, http *http.Server, conf *conf.Server) *App{
+func NewApp(grpc *grpc.Server, http *http.Server, conf_server *conf.Server, bc *conf.Bootstrap) *App {
 	return &App{
 		grpc: grpc,
 		http: http,
-		conf: conf,
+		conf_srv: conf_server,
+		bc: bc,
 	}
 }
 
@@ -51,44 +54,44 @@ func (a *App) Run() []error {
 
 	var srvErrs []error
 	var wg sync.WaitGroup
-	
-	wg.Go(func ()  {
-		log.Printf("GPRC servers starting: %s", a.conf.GRPC.Address)
+
+	wg.Go(func() {
+		log.Printf("GPRC servers starting: %s", a.conf_srv.GRPC.Addr)
 		// 启动 gRPC 服务器
-		lis, err := net.Listen("tcp", a.conf.GRPC.Address)
+		lis, err := net.Listen("tcp", a.conf_srv.GRPC.Addr)
 		if err != nil {
 			srvErrs = append(srvErrs, fmt.Errorf("failed to listen for gRPC: %w", err))
 		}
 		// Serve 会在 GracefulStop 调用后返回错误，这是正常行为
 		if err := a.grpc.Serve(lis); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
-            // 我们只关心那些不是“服务器正常关闭”的错误
+			// 我们只关心那些不是“服务器正常关闭”的错误
 			srvErrs = append(srvErrs, fmt.Errorf("gRPC server failed to serve: %w", err))
 		}
 	})
 
-	wg.Go(func ()  {
+	wg.Go(func() {
 		<-ctx.Done() // 等待接收到终止信号
 		log.Println("Shutting down GPRC servers...")
-		
+
 		// 关闭 gRPC 服务器
 		a.grpc.GracefulStop()
 	})
 
-	wg.Go(func ()  {	
-		log.Printf("HTTP servers starting: %s", a.conf.HTTP.Address)
+	wg.Go(func() {
+		log.Printf("HTTP servers starting: %s", a.conf_srv.HTTP.Addr)
 		// 启动 HTTP 服务器
 		if err := a.http.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			srvErrs = append(srvErrs, fmt.Errorf("HTTP server failed to serve: %w", err))
 		}
-	
+
 	})
 
-	wg.Go(func ()  {
+	wg.Go(func() {
 		<-ctx.Done() // 等待接收到终止信号
 		log.Println("Shutting down HTTP servers...")
 		//关闭HTTP
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()	
+		defer cancel()
 		if err := a.http.Shutdown(shutdownCtx); err != nil {
 			srvErrs = append(srvErrs, fmt.Errorf("HTTP server shutdown error: %w", err))
 		}
@@ -97,45 +100,52 @@ func (a *App) Run() []error {
 	return srvErrs
 }
 
-func main(){
-	bc, err := newConfig()
-	if err != nil {
-		log.Printf("init config error: %v\n", err)
-		panic(err)
-	} 
+func main() {
 
-	app, cleanup, err := InitializeApp(bc.Server, bc.Data)
+	app, cleanup, err := InitializeApp()
 	if err != nil {
 		log.Printf("init app error: %v\n", err)
 		panic(err)
 	}
 	defer cleanup()
 
+	migrateDatabase(app.bc)
+
 	srvErrs := app.Run()
 	for _, err := range srvErrs {
 		log.Printf("run app error: %v\n", err)
-	}	
+	}
+
 }
 
-func newConfig() (*conf.Bootstrap , error){
+func LoadConfig() (*conf.Bootstrap, error) {
 	flag.Parse()
-	// 1. 读取配置文件
-	config := kratosconfig.New(
-		kratosconfig.WithSource(
-			kratosconfigfile.NewSource(flagconf),
-		),
-	)
-	defer config.Close()
 
-	// 2. 加载配置文件
-	if err := config.Load(); err != nil {
+	// viper
+	v := viper.New()
+	// 设置配置文件
+	v.SetConfigFile(flagconf) 
+	v.SetConfigType("yaml")
+
+	// 读取配置文件
+	if err := v.ReadInConfig(); err != nil {
+		return nil, err
+	}	
+
+	// 将配置 unmarshal 到 conf.Bootstrap
+	var bc conf.Bootstrap
+	if err := v.Unmarshal(&bc); err != nil {
 		return nil, err
 	}
 
-	// 3. 反射到结构体
-	var bc conf.Bootstrap	
-	if err := config.Scan(&bc); err != nil {
-		return nil, err
-	}
 	return &bc, nil
+}
+
+func migrateDatabase(c *conf.Bootstrap) error {
+	db, err := gorm.Open(mysql.Open(c.Data.MySQL.DSN), &gorm.Config{})
+	if err != nil {
+		return err
+	}
+	// 在这里同时迁移 UserPO 和 ProductPO
+	return db.AutoMigrate(&data.UserPO{})
 }

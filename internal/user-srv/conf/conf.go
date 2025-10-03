@@ -1,50 +1,58 @@
 package conf
 
-type GRPC struct {
-	Network  string  `json:"network"`
-	Address  string  `json:"address"`
-	Timeout  int64   `json:"timeout"`
-	CertFile string  `json:"cert_file"`
-	KeyFile  string  `json:"key_file"`
+type Server_GRPC struct {
+	Network  string `mapstructure:"network"`
+	Addr     string `mapstructure:"addr"`
+	// Timeout  int64  `mapstructure:"timeout"`
+	// CertFile string `mapstructure:"cert_file"`
+	// KeyFile  string `mapstructure:"key_file"`
 }
 
-type HTTP struct {
-	Network      string `json:"network"`
-	Address      string `json:"address"`
-	Timeout      int64  `json:"timeout"`
-	CertFile     string `json:"cert_file"`
-	KeyFile      string `json:"key_file"`
-	CORS         bool   `json:"cors"`
-	AllowedHosts []string `json:"allowed_hosts"`
+type Server_HTTP struct {
+	Network      string   `mapstructure:"network"`
+	Addr         string   `mapstructure:"addr"`
+	// Timeout      int64    `mapstructure:"timeout"`
+	// CertFile     string   `mapstructure:"cert_file"`
+	// KeyFile      string   `mapstructure:"key_file"`
+	// CORS         bool     `mapstructure:"cors"`
+	// AllowedHosts []string `mapstructure:"allowed_hosts"`
 }
 
-type Redis struct {
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Password string `json:"password"`
-	DB       int    `json:"db"`
+type Server_Redis struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	Password string `mapstructure:"password"`
+	DB       int    `mapstructure:"db"`
 }
 
-type MySQL struct {
-	Drive string `json:"drive"`
-	DSN   string	`json:"dsn"`
-	MaxidleConns int `json:"max_idle_conns"`
-	MaxOpenConns int `json:"max_open_conns"`
-	MaxLifetime  int64 `json:"max_lifetime"`
+type Server_MySQL struct {
+	Drive        string `mapstructure:"drive"`
+	DSN          string `mapstructure:"dsn"`
+	MaxidleConns int    `mapstructure:"max_idle_conns"`
+	MaxOpenConns int    `mapstructure:"max_open_conns"`
+	MaxLifetime  int64  `mapstructure:"max_lifetime"`
 }
 
-type Server struct{
-	HTTP *HTTP `json:"http"`
-	GRPC *GRPC `json:"grpc"`
+type Auth struct {
+	JwtKey string `mapstructure:"jwt_key"`
+	Expire int64  `mapstructure:"expire"`
+	Algorithm string `mapstructure:"algorithm"` 
+
+}
+
+
+type Server struct {
+	HTTP *Server_HTTP `mapstructure:"http"`
+	GRPC *Server_GRPC `mapstructure:"grpc"`
 }
 
 type Data struct {
-	MySQL *MySQL `json:"mysql"`
-	Redis *Redis `json:"redis"`
+	MySQL *Server_MySQL `mapstructure:"mysql"`
+	Redis *Server_Redis `mapstructure:"redis"`
 }
 
-
 type Bootstrap struct {
-	Server *Server  `json:"server"`
-	Data *Data `json:"data"`
+	Server *Server `mapstructure:"server"`
+	Data   *Data   `mapstructure:"data"`
+	Auth   *Auth   `mapstructure:"auth"`
 }

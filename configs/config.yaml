@@ -9,24 +9,24 @@ server:
   # 对应 Go 结构体：Config.Server.HTTP
   http:
     network: "tcp"
-    address: "0.0.0.0:8080"
-    timeout: 5 # 秒 (int64)
-    cert_file: ""
-    key_file: ""
-    cors: true
-    allowed_hosts:
-      - "127.0.0.1:8080"
-      - "localhost:8080"
-      - "0.0.0.0:8080"
+    addr:    "0.0.0.0:8080"
+    # timeout: 5 # 秒 (int64)
+    # cert_file: ""
+    # key_file: ""
+    # cors: true
+    # allowed_hosts:
+    #   - "127.0.0.1:8080"
+    #   - "localhost:8080"
+    #   - "0.0.0.0:8080"
   
   # GRPC 服务配置
   # 对应 Go 结构体：Config.Server.GRPC
   grpc:
     network: "tcp"
-    address: "0.0.0.0:9090"
-    timeout: 5 # 秒 (int64)
-    cert_file: ""
-    key_file: ""
+    addr:    "0.0.0.0:9090"
+    # timeout: 5 # 秒 (int64)
+    # cert_file: ""
+    # key_file: ""
 
 # --------------------------------
 # Data 配置
@@ -50,3 +50,12 @@ data:
     port: 6379
     password: ""
     db: 0 # 数据库编号
+
+# --------------------------------
+# Auth 配置
+# 对应 Go 结构体：Config.Auth
+# --------------------------------
+auth:
+  jwt_key:  "ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm4isbTs8y29Zs="
+  expire:  86400  # 秒 (int64)
+  algorithm: "Hash256" 
