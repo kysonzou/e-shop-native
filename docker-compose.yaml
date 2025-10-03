@@ -1,0 +1,57 @@
+# docker-compose.yaml
+
+version: '3.8'
+
+# 定义我们项目的所有服务
+services:
+  # etcd 服务，作为我们的服务注册与发现中心
+  etcd:
+    image: bitnamilegacy/etcd:3.6.4-debian-12-r4
+    container_name: eshop-etcd
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes # 允许无密码访问，仅限开发环境
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379 # 告知客户端其访问地址
+    volumes:
+      - etcd_data:/bitnami/etcd
+    networks:
+      - eshop-network
+
+  # mysql 服务，用于存储业务数据（用户、商品等）
+  mysql:
+    image: mysql:8.0
+    container_name: eshop-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456 # 设置root 密码
+      - MYSQL_DATABASE=e-shop-db # 项目启动时自动创建的数据库名
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - eshop-network
+
+  # redis 服务，未来用于缓存、session等
+  redis:
+    image: redis:6.2-alpine
+    container_name: eshop-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eshop-network
+
+# 定义 Docker 的网络，让所有容器可以互相通信
+networks:
+  eshop-network:
+    driver: bridge
+
+# 定义数据卷，用于数据持久化
+volumes:
+  etcd_data:
+  mysql_data:
+  redis_data:

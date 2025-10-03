@@ -1,0 +1,52 @@
+# config.yaml
+
+# --------------------------------
+# Server 配置
+# 对应 Go 结构体：Config.Server
+# --------------------------------
+server:
+  # HTTP 服务配置
+  # 对应 Go 结构体：Config.Server.HTTP
+  http:
+    network: "tcp"
+    address: "0.0.0.0:8080"
+    timeout: 5 # 秒 (int64)
+    cert_file: ""
+    key_file: ""
+    cors: true
+    allowed_hosts:
+      - "127.0.0.1:8080"
+      - "localhost:8080"
+      - "0.0.0.0:8080"
+  
+  # GRPC 服务配置
+  # 对应 Go 结构体：Config.Server.GRPC
+  grpc:
+    network: "tcp"
+    address: "0.0.0.0:9090"
+    timeout: 5 # 秒 (int64)
+    cert_file: ""
+    key_file: ""
+
+# --------------------------------
+# Data 配置
+# 对应 Go 结构体：Config.Data
+# --------------------------------
+data:
+  # MySQL 数据库配置
+  # 对应 Go 结构体：Config.Data.MySQL
+  mysql:
+    drive: "mysql"
+    # DSN 是完整的连接字符串
+    dsn: "root:123456@tcp(127.0.0.1:3306)/e-shop-db?charset=utf8mb4&parseTime=True&loc=Local"
+    max_idle_conns: 10 # 连接池中最大空闲连接数
+    max_open_conns: 100 # 连接池中最大打开连接数
+    max_lifetime: 3600 # 秒，连接可复用的最长时间 (int64)
+
+  # Redis 缓存配置
+  # 对应 Go 结构体：Config.Data.Redis
+  redis:
+    host: "127.0.0.1"
+    port: 6379
+    password: ""
+    db: 0 # 数据库编号
