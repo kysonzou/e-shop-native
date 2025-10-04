@@ -7,10 +7,20 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func NewGRPCServer(c *conf.Server, src v1.UserServiceServer) *grpc.Server {
+func NewGRPCServer(c *conf.Server, src v1.UserServiceServer) *BusinessGRPCServer {
+	// options
+	opts := grpc.ChainUnaryInterceptor(
+		RecoverInterceptor,
+		LoggingInterceptor,
+		AuthInterceptor,
+		ErrorInterceptor,
+		MetricsInterceptor,
+	)
 
 	// Create the gRPC server
-	server := grpc.NewServer()
+	server := grpc.NewServer(opts)
+
+	
 	// Register your gRPC services here
 	v1.RegisterUserServiceServer(server, src)
 
@@ -18,5 +28,5 @@ func NewGRPCServer(c *conf.Server, src v1.UserServiceServer) *grpc.Server {
 	reflection.Register(server)
 
 	// Return the gRPC server instance
-	return server
+	return &BusinessGRPCServer{Server: server}
 }

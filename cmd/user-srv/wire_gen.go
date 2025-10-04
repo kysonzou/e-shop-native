@@ -29,15 +29,16 @@ func InitializeApp() (*App, func(), error) {
 	userRepo := data.NewUserRepo(dataData)
 	userService := biz.NewUserUsecase(userRepo)
 	userServiceServer := service.NewUserService(userService)
-	grpcServer := sever.NewGRPCServer(server, userServiceServer)
-	httpServer := sever.NewHTTPServer(server)
+	businessGRPCServer := sever.NewGRPCServer(server, userServiceServer)
+	businessHTTPServer := sever.NewHTTPServer(server)
 	log := ProvideLogConfig(bootstrap)
 	logger, err := NewLogger(log)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	app := NewApp(grpcServer, httpServer, server, bootstrap, logger)
+	adminHTTPServer := sever.NewAdminServer(server)
+	app := NewApp(businessGRPCServer, businessHTTPServer, server, confData, logger, adminHTTPServer)
 	return app, func() {
 		cleanup()
 	}, nil

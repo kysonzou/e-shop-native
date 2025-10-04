@@ -28,6 +28,12 @@ server:
     # cert_file: ""
     # key_file: ""
 
+  # Admin 配置
+  # 对应 Go 结构体：Config.Server.Admin
+  admin:
+    newwork: "tpc"
+    addr: "0.0.0.0:8081"
+
 # --------------------------------
 # Data 配置
 # 对应 Go 结构体：Config.Data
@@ -67,3 +73,11 @@ auth:
 log:
   level: "debug" # 日志级别, e.g., "debug", "info", "warn", "error"
   format: "console" # // 日志格式, e.g., "json", "console"
+
+# --------------------------------
+# Admin 配置
+# 对应 Go 结构体：Config.Admin
+# --------------------------------
+admin:
+  newwork: "tpc"
+  addr: "0.0.0.0:8081"

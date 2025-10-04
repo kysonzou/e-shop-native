@@ -45,16 +45,22 @@ type Log struct {
 	Format string `mapstructure:"format"`
 }
 
-
-type Server struct {
-	HTTP *Server_HTTP `mapstructure:"http"`
-	GRPC *Server_GRPC `mapstructure:"grpc"`
-}
-
 type Data struct {
 	MySQL *Server_MySQL `mapstructure:"mysql"`
 	Redis *Server_Redis `mapstructure:"redis"`
 }
+
+type Server_Admin struct {
+	Network string `mapstructure:"network"`
+	Addr    string `mapstructure:"addr"`
+}
+
+type Server struct {
+	HTTP *Server_HTTP `mapstructure:"http"`
+	GRPC *Server_GRPC `mapstructure:"grpc"`
+	Admin *Server_Admin `mapstructure:"admin"`
+}
+
 
 type Bootstrap struct {
 	Server *Server `mapstructure:"server"`

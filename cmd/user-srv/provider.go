@@ -27,6 +27,7 @@ func ProvideLogConfig(c *conf.Bootstrap) *conf.Log {
 	return c.Log
 }
 
+
 func LoadConfig() (*conf.Bootstrap, error) {
 	flag.Parse()
 
