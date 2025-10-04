@@ -5,10 +5,11 @@ package main
 import (
 	"github.com/google/wire"
 	//"github.com/kyson/e-shop-native/internal/user-srv/conf"
+	"github.com/kyson/e-shop-native/internal/user-srv/auth"
+	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"github.com/kyson/e-shop-native/internal/user-srv/service"
 	"github.com/kyson/e-shop-native/internal/user-srv/sever"
-	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 )
 
 func InitializeApp() (*App, func(), error) {
@@ -16,6 +17,7 @@ func InitializeApp() (*App, func(), error) {
 		ProvideDataConfig,
 		ProvideServerConfig,
 		ProvideLogConfig,
+		ProvideAuthConfig,
 
 		LoadConfig,
 		NewApp,
@@ -24,5 +26,6 @@ func InitializeApp() (*App, func(), error) {
 		data.ProviderSet,
 		service.ProviderSet,
 		sever.ProviderSet,
+		auth.ProviderSet,
 	))
 }

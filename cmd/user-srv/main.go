@@ -15,10 +15,10 @@ import (
 
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
+	"github.com/kyson/e-shop-native/internal/user-srv/sever"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
-	"github.com/kyson/e-shop-native/internal/user-srv/sever"
 	"gorm.io/gorm"
 )
 
@@ -33,29 +33,29 @@ type App struct {
 }
 
 type Server struct {
-	grpc_srv *grpc.Server
-	http_srv *http.Server
+	grpc_srv  *grpc.Server
+	http_srv  *http.Server
 	admin_srv *http.Server
 	grpc_addr string
 }
 
-func NewApp(grpc *sever.BusinessGRPCServer, 
-			http *sever.BusinessHTTPServer,
-			conf_server *conf.Server, 
-			data_server *conf.Data, 
-			logger *zap.Logger,
-			admin *sever.AdminHTTPServer) *App {
+func NewApp(grpc *sever.BusinessGRPCServer,
+	http *sever.BusinessHTTPServer,
+	conf_server *conf.Server,
+	data_server *conf.Data,
+	logger *zap.Logger,
+	admin *sever.AdminHTTPServer) *App {
 	return &App{
 		Server: &Server{
-			grpc_srv: grpc.Server,
-			http_srv: http.Server,
+			grpc_srv:  grpc.Server,
+			http_srv:  http.Server,
 			admin_srv: admin.Server,
 			grpc_addr: conf_server.GRPC.Addr,
 		},
 		//conf_srv: conf_server,
 		//data_srv: data_server,
 		mysql_dsn: data_server.MySQL.DSN,
-		logger: logger,
+		logger:    logger,
 	}
 }
 
@@ -117,7 +117,7 @@ func (a *Server) Run() []error {
 		// 启动 HTTP 服务器
 		if err := a.admin_srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			srvErrs = append(srvErrs, fmt.Errorf("Admin server failed to serve: %w", err))
-		}	
+		}
 	})
 
 	wg.Go(func() {
@@ -126,21 +126,19 @@ func (a *Server) Run() []error {
 		// 关闭admin服务器
 		ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancle()
-		if err := a.admin_srv.Shutdown(ctx); err != nil{
-			srvErrs = append(srvErrs, fmt.Errorf("Admin server shutdown error: %w", err))	
+		if err := a.admin_srv.Shutdown(ctx); err != nil {
+			srvErrs = append(srvErrs, fmt.Errorf("Admin server shutdown error: %w", err))
 		}
 	})
 	wg.Wait()
 	return srvErrs
 }
 
-
 func init() {
 	//从终端读取config.yaml文件
 	flag.StringVar(&flagconf, "conf", "./configs/config.yaml", "config path, eg: -conf config.yaml")
 
 }
-
 
 func main() {
 

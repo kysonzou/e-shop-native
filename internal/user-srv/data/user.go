@@ -34,7 +34,7 @@ func (po UserPO) toBizUser() *biz.User {
 		Password: po.Password,
 		Phone:    po.Phone,
 		Email:    po.Email,
-	}	
+	}
 }
 
 func (r *UserRepo) Create(ctx context.Context, user *biz.User) (*biz.User, error) {
@@ -55,7 +55,7 @@ func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*biz.Us
 	if err := r.data.db.WithContext(ctx).Where("user_name = ?", username).First(&po).Error; err != nil {
 		return nil, err
 	}
-	return po.toBizUser(), nil		
+	return po.toBizUser(), nil
 }
 
 func (r *UserRepo) FindByID(ctx context.Context, id uint) (*biz.User, error) {

@@ -63,8 +63,11 @@ data:
 # --------------------------------
 auth:
   jwt_key:  "ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm4isbTs8y29Zs="
-  expire:  86400  # 秒 (int64)
-  algorithm: "Hash256" 
+  expire_duration:  86400  # 秒 (int64)
+  algorithm: "Hash256" # Hash256、Hash384、Hash512
+  whitelist:
+    - /user.v1.UserService/Login
+    - /user.v1.UserService/Register
 
 # --------------------------------
 # Logger 配置

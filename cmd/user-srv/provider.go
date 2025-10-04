@@ -11,6 +11,7 @@ import (
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	"github.com/spf13/viper"
 )
+
 func ProvideServerConfig(c *conf.Bootstrap) *conf.Server {
 	return c.Server
 }
@@ -27,20 +28,19 @@ func ProvideLogConfig(c *conf.Bootstrap) *conf.Log {
 	return c.Log
 }
 
-
 func LoadConfig() (*conf.Bootstrap, error) {
 	flag.Parse()
 
 	// viper
 	v := viper.New()
 	// 设置配置文件
-	v.SetConfigFile(flagconf) 
+	v.SetConfigFile(flagconf)
 	v.SetConfigType("yaml")
 
 	// 读取配置文件
 	if err := v.ReadInConfig(); err != nil {
 		return nil, err
-	}	
+	}
 
 	// 将配置 unmarshal 到 conf.Bootstrap
 	var bc conf.Bootstrap
@@ -75,7 +75,7 @@ func NewLogger(c *conf.Log) (*zap.Logger, error) {
 	default:
 		return nil, fmt.Errorf("unsupported log format: %s", c.Format)
 	}
-	
+
 	// // 可选：配置输出路径
 	// if len(c.OutputPaths) > 0 {
 	// 	cfg.OutputPaths = c.OutputPaths

@@ -17,13 +17,13 @@ var (
 	HttpRequestTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "http_request_total",
-			Help: "Total number of HTTP requests",	
+			Help: "Total number of HTTP requests",
 			// ConstLabels: prometheus.Labels{ // 通过它可以携带各种常量信息
 			// 	"service": "user-srv",
 			// },
 		},
 		[]string{"method", "path", "code"}, // 动态变量，需要在具体实现的时候给它赋值
-	)	
+	)
 
 	HttpRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -64,8 +64,8 @@ func MetricsInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo
 
 	resp, err = handler(ctx, req)
 
-	duration := time.Since(start)	
-	statusCode := status.Code(err).String()	
+	duration := time.Since(start)
+	statusCode := status.Code(err).String()
 
 	// 记录指标
 	GRPCRequestTotal.WithLabelValues(info.FullMethod, statusCode).Inc()
@@ -83,7 +83,7 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(ww, r)
 
-		duration := time.Since(start)	
+		duration := time.Since(start)
 		fmt.Printf("MetricsMiddleware called for method: %s\n", r.URL.Path)
 		HttpRequestTotal.WithLabelValues(r.Method, r.URL.Path, strconv.Itoa(ww.Status())).Inc()
 		HttpRequestDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration.Seconds())

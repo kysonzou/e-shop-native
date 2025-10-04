@@ -6,20 +6,56 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 )
-var ErrTokenInvalid = errors.New("token is invalid")
 
-var jwtKey = []byte("ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm4isbTs8y29Zs=")
-var expirationTime = time.Now().Add(24 * time.Hour)
+var ErrTokenInvalid = errors.New("token is invalid")
 
 // Claims struct definition
 type Claims struct {
-	Id              uint   `json:"id"`
-	UserName        string `json:"userName"`
+	Id       uint   `json:"id"`
+	UserName string `json:"userName"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(id uint, userName string) (string, error) {
+type AuthIMP struct {
+	jwtKey         []byte
+	expireDuration time.Duration
+	algorithm      jwt.SigningMethod
+	whitelist      []string
+}
+
+type Auth interface {
+	GenerateToken(ctx context.Context, id uint, userName string) (string, error)
+	ParseAndSaveToken(ctx context.Context, tokenS string) (context.Context, error)
+	ToContext(ctx context.Context, claims *Claims) context.Context
+	FromContext(ctx context.Context) (*Claims, bool)
+	GetWhiteList() []string
+}
+
+func NewAuth(c *conf.Auth) Auth {
+	var algorithm jwt.SigningMethod
+	switch c.Algorithm {
+	case "HS256":
+		algorithm = jwt.SigningMethodHS256
+	case "HS384":
+		algorithm = jwt.SigningMethodHS384
+	case "HS512":
+		algorithm = jwt.SigningMethodHS512
+	default:
+		algorithm = jwt.SigningMethodHS256
+	}
+	authIMP := &AuthIMP{
+		jwtKey:         []byte(c.JwtKey),
+		expireDuration: time.Second * time.Duration(c.ExpireDuration),
+		algorithm:      algorithm,
+		whitelist:      c.Whitelist,
+	}
+	return authIMP
+}
+
+func (auth *AuthIMP) GenerateToken(ctx context.Context, id uint, userName string) (string, error) {
+	expirationTime := time.Now().Add(auth.expireDuration) // 每次生成时计算
 	claims := Claims{
 		Id:       id,
 		UserName: userName,
@@ -27,35 +63,40 @@ func GenerateToken(id uint, userName string) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) // 计算claims "指纹"
-	tokenString, err := token.SignedString(jwtKey) // 密钥签名
+
+	token := jwt.NewWithClaims(auth.algorithm, claims)  // 计算claims "指纹"
+	tokenString, err := token.SignedString(auth.jwtKey) // 密钥签名
 	return tokenString, err
 }
 
 // ParseToken 解析并验证一个 JWT 字符串
-func ParseToken(tokenS string) (*Claims, error) {
+func (auth *AuthIMP) ParseAndSaveToken(ctx context.Context, tokenS string) (context.Context, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenS, claims, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrTokenInvalid
 		}
-		return jwtKey, nil
+		return auth.jwtKey, nil
 	})
-
 	if err != nil || !token.Valid {
-		return nil, ErrTokenInvalid
+		return ctx, ErrTokenInvalid
 	}
-	return claims, nil
+
+	return auth.ToContext(ctx, claims), nil
 }
 
 type claimKey struct{}
 
 // ToContext 和 FromContext
-func ToContext(ctx context.Context, claims *Claims) context.Context {
+func (auth *AuthIMP) ToContext(ctx context.Context, claims *Claims) context.Context {
 	return context.WithValue(ctx, claimKey{}, claims)
 }
 
-func FromContext(ctx context.Context) (*Claims, bool) {
+func (auth *AuthIMP) FromContext(ctx context.Context) (*Claims, bool) {
 	claims, ok := ctx.Value(claimKey{}).(*Claims)
 	return claims, ok
+}
+
+func (a *AuthIMP) GetWhiteList() []string {
+	return a.whitelist
 }

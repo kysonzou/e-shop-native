@@ -1,16 +1,16 @@
 package conf
 
 type Server_GRPC struct {
-	Network  string `mapstructure:"network"`
-	Addr     string `mapstructure:"addr"`
+	Network string `mapstructure:"network"`
+	Addr    string `mapstructure:"addr"`
 	// Timeout  int64  `mapstructure:"timeout"`
 	// CertFile string `mapstructure:"cert_file"`
 	// KeyFile  string `mapstructure:"key_file"`
 }
 
 type Server_HTTP struct {
-	Network      string   `mapstructure:"network"`
-	Addr         string   `mapstructure:"addr"`
+	Network string `mapstructure:"network"`
+	Addr    string `mapstructure:"addr"`
 	// Timeout      int64    `mapstructure:"timeout"`
 	// CertFile     string   `mapstructure:"cert_file"`
 	// KeyFile      string   `mapstructure:"key_file"`
@@ -34,14 +34,14 @@ type Server_MySQL struct {
 }
 
 type Auth struct {
-	JwtKey string `mapstructure:"jwt_key"`
-	Expire int64  `mapstructure:"expire"`
-	Algorithm string `mapstructure:"algorithm"` 
-
+	JwtKey         string   `mapstructure:"jwt_key"`
+	ExpireDuration int64    `mapstructure:"expire_duration"`
+	Algorithm      string   `mapstructure:"algorithm"`
+	Whitelist      []string `mapstructure:"whitelist"`
 }
 
 type Log struct {
-	Level string `mapstructure:"level"`
+	Level  string `mapstructure:"level"`
 	Format string `mapstructure:"format"`
 }
 
@@ -56,11 +56,10 @@ type Server_Admin struct {
 }
 
 type Server struct {
-	HTTP *Server_HTTP `mapstructure:"http"`
-	GRPC *Server_GRPC `mapstructure:"grpc"`
+	HTTP  *Server_HTTP  `mapstructure:"http"`
+	GRPC  *Server_GRPC  `mapstructure:"grpc"`
 	Admin *Server_Admin `mapstructure:"admin"`
 }
-
 
 type Bootstrap struct {
 	Server *Server `mapstructure:"server"`

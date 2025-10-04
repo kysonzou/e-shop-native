@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"github.com/kyson/e-shop-native/internal/user-srv/service"
@@ -28,8 +29,10 @@ func InitializeApp() (*App, func(), error) {
 	}
 	userRepo := data.NewUserRepo(dataData)
 	userService := biz.NewUserUsecase(userRepo)
-	userServiceServer := service.NewUserService(userService)
-	businessGRPCServer := sever.NewGRPCServer(server, userServiceServer)
+	confAuth := ProvideAuthConfig(bootstrap)
+	authAuth := auth.NewAuth(confAuth)
+	userServiceServer := service.NewUserService(userService, authAuth)
+	businessGRPCServer := sever.NewGRPCServer(server, userServiceServer, authAuth)
 	businessHTTPServer := sever.NewHTTPServer(server)
 	log := ProvideLogConfig(bootstrap)
 	logger, err := NewLogger(log)
