@@ -7,21 +7,16 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 
 type User struct {
 	ID       uint
-	UserName string
-	Password string
-	Phone    string
-	Email    string
+	UserName string `validate:"required,min=3,max=20,username"`
+	Password string `validate:"required,min=8,max=64,password"`
+	Phone    string `validate:"required,phone"`
+	Email    string `validate:"required,email"`
 }
-
-var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrInvalidEmail      = errors.New("invalid email format")
-	ErrUserNotFound      = errors.New("user not found")
-)
 
 type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
@@ -50,7 +45,7 @@ func (uc *userUsecase) RegisterUser(ctx context.Context, user *User) (*User, err
 	// 1. 检查用户名是否已存在
 	_, err := uc.repo.FindByUsername(ctx, user.UserName)
 	if err == nil {
-		return nil, ErrUserAlreadyExists // 用户名已存在
+		return nil, apperrors.ErrUserAlreadyExists // 用户名已存在
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		// 其他数据库错误
@@ -61,7 +56,7 @@ func (uc *userUsecase) RegisterUser(ctx context.Context, user *User) (*User, err
 	// A simple regex for email validation
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	if !emailRegex.MatchString(user.Email) {
-		return nil, ErrInvalidEmail
+		return nil, apperrors.ErrEmailInvalid
 	}
 
 	// 3. 密码hash
@@ -85,7 +80,7 @@ func (uc *userUsecase) Login(ctx context.Context, username, password string) (*U
 	user, err := uc.repo.FindByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
+			return nil, apperrors.ErrUserNotFound
 		}
 		return nil, err
 	}
@@ -105,7 +100,7 @@ func (uc *userUsecase) GetMyProfile(ctx context.Context, userID uint) (*User, er
 	user, err := uc.repo.FindByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUserNotFound
+			return nil, apperrors.ErrUserNotFound
 		}
 		return nil, err
 	}

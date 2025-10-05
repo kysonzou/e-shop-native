@@ -2,14 +2,14 @@ package auth
 
 import (
 	"context"
-	"errors"
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 )
 
-var ErrTokenInvalid = errors.New("token is invalid")
+
 
 // Claims struct definition
 type Claims struct {
@@ -74,12 +74,12 @@ func (auth *AuthIMP) ParseAndSaveToken(ctx context.Context, tokenS string) (cont
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenS, claims, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrTokenInvalid
+			return nil, apperrors.ErrTokenInvalid
 		}
 		return auth.jwtKey, nil
 	})
 	if err != nil || !token.Valid {
-		return ctx, ErrTokenInvalid
+		return ctx, apperrors.ErrTokenInvalid
 	}
 
 	return auth.ToContext(ctx, claims), nil

@@ -2,16 +2,15 @@ package service
 
 import (
 	"context"
-
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 )
 
 type UserService struct {
-	uc   biz.UserService
+	uc biz.UserService
 	auth auth.Auth
-	// Add any dependencies or fields here
 	v1.UnimplementedUserServiceServer
 }
 
@@ -70,7 +69,7 @@ func (s *UserService) GetMyProfile(ctx context.Context, req *v1.GetMyProfileRequ
 	//读取Token
 	claims, ok := s.auth.FromContext(ctx)
 	if !ok {
-		return nil, auth.ErrTokenInvalid
+		return nil, apperrors.ErrTokenInvalid
 	}
 
 	user, err := s.uc.GetMyProfile(ctx, claims.Id)

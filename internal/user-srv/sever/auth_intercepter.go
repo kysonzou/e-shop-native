@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"	
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 
 	"google.golang.org/grpc"
@@ -23,17 +24,17 @@ func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {
 		// 解析token
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, auth.ErrTokenInvalid
+			return nil, apperrors.ErrTokenInvalid
 		}
 
 		authHeaders := md.Get("authorization")
 		if len(authHeaders) == 0 {
-			return nil, auth.ErrTokenInvalid
+			return nil, apperrors.ErrTokenInvalid
 		}
 
 		parts := strings.Split(authHeaders[0], " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			return nil, auth.ErrTokenInvalid
+			return nil, apperrors.ErrTokenInvalid
 		}
 
 		tokenString := parts[1]
