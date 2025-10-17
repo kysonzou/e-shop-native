@@ -1,4 +1,4 @@
-package sever
+package server
 
 import (
 	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1" // Update to the correct import path for your generated gRPC code

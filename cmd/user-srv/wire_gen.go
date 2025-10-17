@@ -10,8 +10,8 @@ import (
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
+	"github.com/kyson/e-shop-native/internal/user-srv/server"
 	"github.com/kyson/e-shop-native/internal/user-srv/service"
-	"github.com/kyson/e-shop-native/internal/user-srv/sever"
 	"github.com/kyson/e-shop-native/internal/user-srv/validator"
 )
 
@@ -22,7 +22,7 @@ func InitializeApp() (*App, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	server := ProvideServerConfig(bootstrap)
+	confServer := ProvideServerConfig(bootstrap)
 	confData := ProvideDataConfig(bootstrap)
 	dataData, cleanup, err := data.NewData(confData)
 	if err != nil {
@@ -43,16 +43,16 @@ func InitializeApp() (*App, func(), error) {
 		return nil, nil, err
 	}
 	userServiceServer := service.NewUserService(userService, authAuth)
-	businessGRPCServer := sever.NewGRPCServer(server, userServiceServer, authAuth)
-	businessHTTPServer := sever.NewHTTPServer(server)
+	businessGRPCServer := server.NewGRPCServer(confServer, userServiceServer, authAuth)
+	businessHTTPServer := server.NewHTTPServer(confServer)
 	log := ProvideLogConfig(bootstrap)
 	logger, err := NewLogger(log)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	adminHTTPServer := sever.NewAdminServer(server)
-	app := NewApp(businessGRPCServer, businessHTTPServer, server, confData, logger, adminHTTPServer)
+	adminHTTPServer := server.NewAdminServer(confServer)
+	app := NewApp(businessGRPCServer, businessHTTPServer, confServer, confData, logger, adminHTTPServer)
 	return app, func() {
 		cleanup()
 	}, nil

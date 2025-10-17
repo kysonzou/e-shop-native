@@ -1,4 +1,4 @@
-package sever_test
+package server_test
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
-	"github.com/kyson/e-shop-native/internal/user-srv/sever"
+	"github.com/kyson/e-shop-native/internal/user-srv/server"
 	//apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 
@@ -30,7 +30,7 @@ func TestAuthInterceptor_Unit(t *testing.T) {
 	require.NoError(t, err)
 
 	// 获取拦截器函数
-	interceptor := sever.AuthInterceptor(authInstance)
+	interceptor := server.AuthInterceptor(authInstance)
 
 	// --- 定义我们的测试用例 ---
 

@@ -15,7 +15,7 @@ import (
 
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
-	"github.com/kyson/e-shop-native/internal/user-srv/sever"
+	"github.com/kyson/e-shop-native/internal/user-srv/server"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
@@ -39,12 +39,12 @@ type Server struct {
 	grpc_addr string
 }
 
-func NewApp(grpc *sever.BusinessGRPCServer,
-	http *sever.BusinessHTTPServer,
+func NewApp(grpc *server.BusinessGRPCServer,
+	http *server.BusinessHTTPServer,
 	conf_server *conf.Server,
 	data_server *conf.Data,
 	logger *zap.Logger,
-	admin *sever.AdminHTTPServer) *App {
+	admin *server.AdminHTTPServer) *App {
 	return &App{
 		Server: &Server{
 			grpc_srv:  grpc.Server,

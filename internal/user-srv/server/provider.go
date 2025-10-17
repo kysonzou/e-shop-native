@@ -1,4 +1,4 @@
-package sever
+package server
 
 import "github.com/google/wire"
 
