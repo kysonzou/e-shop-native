@@ -6,9 +6,21 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME=e-shop-server
 API_PROTO_FILES=$(shell find api/protobuf -name *.proto)
+#定义 Makefile 变量 , 这个`,`千万别加空格
+BIZ_INTERFACES = UserRepo,UserService,UserValidator,PasswordHash
 
 # Default target
 all: help
+
+
+mock:
+	@echo ">> generating mocks"
+	go install go.uber.org/mock/mockgen@latest
+	mockgen -destination=./internal/user-srv/biz/mock/mocker_biz.go \
+	        -package=mock \
+	        github.com/kyson/e-shop-native/internal/user-srv/biz \
+	        $(BIZ_INTERFACES)
+	@echo ">> mocks generated"
 
 # Run the server
 run_user_srv:

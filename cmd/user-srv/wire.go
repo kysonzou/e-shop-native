@@ -1,5 +1,6 @@
 //go:build wireinject
 
+//go:generate wire //把下面go:build注释掉就可以使用，但是会冲突
 package main
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"github.com/kyson/e-shop-native/internal/user-srv/service"
 	"github.com/kyson/e-shop-native/internal/user-srv/sever"
+	"github.com/kyson/e-shop-native/internal/user-srv/validator"
 )
 
 func InitializeApp() (*App, func(), error) {
@@ -27,5 +29,6 @@ func InitializeApp() (*App, func(), error) {
 		service.ProviderSet,
 		sever.ProviderSet,
 		auth.ProviderSet,
+		validator.ProviderSet,
 	))
 }

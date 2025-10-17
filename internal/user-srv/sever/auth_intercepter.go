@@ -5,11 +5,13 @@ import (
 	"slices"
 	"strings"
 
-	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"	
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
+	//apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {
@@ -24,24 +26,28 @@ func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {
 		// 解析token
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, apperrors.ErrTokenInvalid
+			return nil, status.Errorf(codes.Unauthenticated, "authentication required")
 		}
 
 		authHeaders := md.Get("authorization")
 		if len(authHeaders) == 0 {
-			return nil, apperrors.ErrTokenInvalid
+			return nil, status.Errorf(codes.Unauthenticated, "authentication required")
 		}
 
 		parts := strings.Split(authHeaders[0], " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			return nil, apperrors.ErrTokenInvalid
+			return nil, status.Errorf(codes.Unauthenticated, "invalid token format")
 		}
 
 		tokenString := parts[1]
+		if tokenString == "" {
+			return nil, status.Errorf(codes.Unauthenticated, "token is empty")
+		}
+
 		// 判断token的
 		ctx, err = a.ParseAndSaveToken(ctx, tokenString)
 		if err != nil {
-			return nil, err
+			return nil, status.Errorf(codes.Unauthenticated, "invalid or expired token")
 		}
 
 		return handler(ctx, req)

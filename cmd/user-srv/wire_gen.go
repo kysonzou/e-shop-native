@@ -12,6 +12,7 @@ import (
 	"github.com/kyson/e-shop-native/internal/user-srv/data"
 	"github.com/kyson/e-shop-native/internal/user-srv/service"
 	"github.com/kyson/e-shop-native/internal/user-srv/sever"
+	"github.com/kyson/e-shop-native/internal/user-srv/validator"
 )
 
 // Injectors from wire.go:
@@ -28,9 +29,19 @@ func InitializeApp() (*App, func(), error) {
 		return nil, nil, err
 	}
 	userRepo := data.NewUserRepo(dataData)
-	userService := biz.NewUserUsecase(userRepo)
+	userValidator, err := validator.NewValidator()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	passwordHash := biz.NewBcrypt()
+	userService := biz.NewUserUsecase(userRepo, userValidator, passwordHash)
 	confAuth := ProvideAuthConfig(bootstrap)
-	authAuth := auth.NewAuth(confAuth)
+	authAuth, err := auth.NewAuth(confAuth)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	userServiceServer := service.NewUserService(userService, authAuth)
 	businessGRPCServer := sever.NewGRPCServer(server, userServiceServer, authAuth)
 	businessHTTPServer := sever.NewHTTPServer(server)

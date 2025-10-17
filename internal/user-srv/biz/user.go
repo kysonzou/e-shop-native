@@ -1,12 +1,10 @@
 package biz
 
+//go:generate mockgen -source=user.go -destination=mock/mocker_user.go -package=mock
+
 import (
 	"context"
 	"errors"
-	"regexp"
-
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 
@@ -30,41 +28,53 @@ type UserService interface {
 	GetMyProfile(ctx context.Context, userID uint) (*User, error)
 }
 
-type userUsecase struct {
-	repo UserRepo
+// 验证用户信息是否符合要求
+type UserValidator interface {
+	Validate(user *User) error
 }
 
-func NewUserUsecase(repo UserRepo) UserService {
+type PasswordHash interface {
+	Hash(password string) (string, error)
+	Virefy(password, hashedPassword string) bool
+}
+
+type userUsecase struct {
+	repo      UserRepo
+	validator UserValidator
+	bcrypt    PasswordHash
+}
+
+func NewUserUsecase(repo UserRepo, validator UserValidator, bcrypt PasswordHash) UserService {
 	return &userUsecase{
-		repo: repo,
+		repo:      repo,
+		validator: validator,
+		bcrypt:    bcrypt,
 	}
 }
 
 // RegisterUser registers a new user with the provided details.
 func (uc *userUsecase) RegisterUser(ctx context.Context, user *User) (*User, error) {
-	// 1. 检查用户名是否已存在
+	// 1. 校验格式（用户名、邮箱、密码、手机号）
+	if err := uc.validator.Validate(user); err != nil {
+		return nil, err
+	}
+
+	// 2. 检查用户名是否已存在
 	_, err := uc.repo.FindByUsername(ctx, user.UserName)
 	if err == nil {
 		return nil, apperrors.ErrUserAlreadyExists // 用户名已存在
 	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	if !errors.Is(err, apperrors.ErrUserNotFound) { // 非用户不存在错误
 		// 其他数据库错误
 		return nil, err
 	}
 
-	// 2. 校验邮箱格式
-	// A simple regex for email validation
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !emailRegex.MatchString(user.Email) {
-		return nil, apperrors.ErrEmailInvalid
-	}
-
 	// 3. 密码hash
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	ps, err := uc.bcrypt.Hash(user.Password)
 	if err != nil {
 		return nil, err
 	}
-	user.Password = string(hashedPassword)
+	user.Password = ps
 
 	// 4. 创建新用户
 	createdUser, err := uc.repo.Create(ctx, user)
@@ -79,18 +89,19 @@ func (uc *userUsecase) Login(ctx context.Context, username, password string) (*U
 	// 1. 获取用户信息
 	user, err := uc.repo.FindByUsername(ctx, username)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
 			return nil, apperrors.ErrUserNotFound
 		}
 		return nil, err
 	}
 
 	// 2. 验证密码
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
-		return nil, err
+	ok := uc.bcrypt.Virefy(password, user.Password)
+	if !ok {
+		return nil, apperrors.ErrPasswordInvalid
 	}
 
+	user.Password = password
 	// 3. 返回用户信息
 	return user, nil
 }
@@ -99,7 +110,7 @@ func (uc *userUsecase) GetMyProfile(ctx context.Context, userID uint) (*User, er
 	// 1. 获取用户信息
 	user, err := uc.repo.FindByID(ctx, userID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
 			return nil, apperrors.ErrUserNotFound
 		}
 		return nil, err

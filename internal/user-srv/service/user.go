@@ -2,14 +2,15 @@ package service
 
 import (
 	"context"
-	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
+
 	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 
 type UserService struct {
-	uc biz.UserService
+	uc   biz.UserService
 	auth auth.Auth
 	v1.UnimplementedUserServiceServer
 }
@@ -67,9 +68,9 @@ func (s *UserService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.Logi
 func (s *UserService) GetMyProfile(ctx context.Context, req *v1.GetMyProfileRequest) (*v1.GetMyProfileReply, error) {
 	//这里没有验证Token的有效性，是因为如果每个方法都自己验证的话，就是灾难性的，应该在之前就被验证
 	//读取Token
-	claims, ok := s.auth.FromContext(ctx)
+	claims, ok := auth.FromContext(ctx)
 	if !ok {
-		return nil, apperrors.ErrTokenInvalid
+		return nil, apperrors.ErrJWTInvalid
 	}
 
 	user, err := s.uc.GetMyProfile(ctx, claims.Id)

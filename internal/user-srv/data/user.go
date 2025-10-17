@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 	"gorm.io/gorm"
 )
 
@@ -53,6 +54,9 @@ func (r *UserRepo) Create(ctx context.Context, user *biz.User) (*biz.User, error
 func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*biz.User, error) {
 	var po UserPO
 	if err := r.data.db.WithContext(ctx).Where("user_name = ?", username).First(&po).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, apperrors.ErrUserNotFound
+		}
 		return nil, err
 	}
 	return po.toBizUser(), nil
@@ -61,6 +65,9 @@ func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*biz.Us
 func (r *UserRepo) FindByID(ctx context.Context, id uint) (*biz.User, error) {
 	var po UserPO
 	if err := r.data.db.WithContext(ctx).First(&po, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, apperrors.ErrUserNotFound
+		}
 		return nil, err
 	}
 	return po.toBizUser(), nil
