@@ -43,14 +43,14 @@ func InitializeApp() (*App, func(), error) {
 		return nil, nil, err
 	}
 	userServiceServer := service.NewUserService(userService, authAuth)
-	businessGRPCServer := server.NewGRPCServer(confServer, userServiceServer, authAuth)
-	businessHTTPServer := server.NewHTTPServer(confServer)
 	log := ProvideLogConfig(bootstrap)
 	logger, err := NewLogger(log)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
+	businessGRPCServer := server.NewGRPCServer(confServer, userServiceServer, authAuth, logger)
+	businessHTTPServer := server.NewHTTPServer(confServer)
 	adminHTTPServer := server.NewAdminServer(confServer)
 	app := NewApp(businessGRPCServer, businessHTTPServer, confServer, confData, logger, adminHTTPServer)
 	return app, func() {
