@@ -14,6 +14,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+    // AuthorizationHeader is the header name for authorization.
+    AuthorizationHeader = "authorization"
+    // BearerScheme is the prefix for bearer tokens.
+    BearerScheme = "Bearer"
+)
+
 func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 		// 白名单
@@ -29,13 +36,13 @@ func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {
 			return nil, status.Errorf(codes.Unauthenticated, "authentication required")
 		}
 
-		authHeaders := md.Get("authorization")
+		authHeaders := md.Get(AuthorizationHeader)
 		if len(authHeaders) == 0 {
 			return nil, status.Errorf(codes.Unauthenticated, "authentication required")
 		}
 
 		parts := strings.Split(authHeaders[0], " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
+		if len(parts) != 2 || parts[0] != BearerScheme {
 			return nil, status.Errorf(codes.Unauthenticated, "invalid token format")
 		}
 

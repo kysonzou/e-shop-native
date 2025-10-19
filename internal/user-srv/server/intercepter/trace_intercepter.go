@@ -8,6 +8,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+const TraceIDKey = "X-Trace-ID"
+
 func TraceServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
     // 步骤 1: 从传入的 context 中提取 gRPC metadata
     // gRPC 框架已经帮我们把请求头解析好，并放在了 context 中。
@@ -21,7 +23,7 @@ func TraceServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
     // 步骤 2: 从 metadata 中读取 trace_id
     // metadata 本质上是一个 map[string][]string
     var traceID string
-    if vals := md.Get("x-trace-id"); len(vals) > 0 {
+    if vals := md.Get(TraceIDKey); len(vals) > 0 {
         // 如果上游服务传来了 trace_id，我们沿用它
         traceID = vals[0]
     } else {
@@ -31,7 +33,7 @@ func TraceServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
 		// 将traceId写到metadata中
         // 注意：Incoming metadata 是不可变的，所以我们需要创建一个它的副本
         mdCopy := md.Copy()
-        mdCopy.Set("x-trace-id", traceID)
+        mdCopy.Set(TraceIDKey, traceID)
         
         // 创建一个新的 context，它携带了这个更新后的 metadata
         // 这样，后续的中间件或 handler 调用 metadata.FromIncomingContext 就能拿到 trace-id 了
@@ -61,7 +63,7 @@ func TraceClientInterceptor(ctx context.Context, method string, req, reply inter
     // 步骤 2: 将 trace_id 添加到 gRPC 的出站 metadata 中
     // 我们需要修改即将被发送出去的请求的 context，把 metadata “附加”上去。
     // metadata.AppendToOutgoingContext 会创建一个新的 context，其中包含了要发送的头部信息。
-    newCtx := metadata.AppendToOutgoingContext(ctx, "x-trace-id", traceID)
+    newCtx := metadata.AppendToOutgoingContext(ctx, TraceIDKey, traceID)
 
     // 步骤 3: 调用真正的 RPC invoker，并将这个“增强后”的 newCtx 传递下去
     // gRPC 客户端在发送请求时，会自动从 newCtx 中提取出站 metadata，
