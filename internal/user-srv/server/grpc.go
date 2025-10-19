@@ -7,16 +7,19 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	intercepter "github.com/kyson/e-shop-native/internal/user-srv/server/intercepter"
+
 )
 
 func NewGRPCServer(c *conf.Server, src v1.UserServiceServer, auth auth.Auth, log *zap.Logger) *BusinessGRPCServer {
 	// options
 	opts := grpc.ChainUnaryInterceptor(
-		RecoverInterceptor(log),
-		LoggingInterceptor,
-		MetricsInterceptor,
-		AuthInterceptor(auth),
-		ErrorInterceptor,
+		intercepter.TraceServerInterceptor,
+		intercepter.RecoverInterceptor(log),
+		intercepter.LoggingInterceptor,
+		intercepter.MetricsInterceptor,
+		intercepter.AuthInterceptor(auth),
+		intercepter.ErrorInterceptor,
 	)
 
 	// Create the gRPC server

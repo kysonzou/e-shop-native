@@ -1,37 +1,53 @@
 package errors
 
-import "errors"
+import (
+	"github.com/kyson/e-shop-native/pkg/ecode"
+	"google.golang.org/grpc/codes"
+)
+
+// 假设我们定义一个7位错误码 A-BB-CCC：
+// A (1位): 错误级别
+// 1: 客户端错误 (Client-side)
+// 2: 服务端错误 (Server-side)
+// 3: 第三方依赖错误 (Third-party)
+// BB (2位): 服务/模块ID
+// 01: 用户服务
+// 02: 商品服务
+// 03: 订单服务
+// CCC (3位): 具体错误序列号，在该模块内自增。
+
 
 // 通用错误
-var ErrInternal = errors.New("internal error")
+var ErrInternal = ecode.New(202001, "internal server error", codes.Internal) 
 
 // 定义用户相关的错误
 var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrUserNotFound      = errors.New("user not found")
-	ErrPasswordHash      = errors.New("password hash error")
+	ErrUserAlreadyExists = ecode.New(202002, "user already exists", codes.AlreadyExists)  
+	ErrUserNotFound      = ecode.New(202003, "user not found", codes.NotFound)   
+	ErrPasswordHash      = ecode.New(202004, "password hash error", codes.InvalidArgument)   
 )
 
 // 定义认证相关的错误
 var (
-	ErrJWTInvalid       = errors.New("jwt is invalid")
-	ErrJWTParamsInvalid = errors.New("jwt creat failure")
-	ErrJWTKeyNotEmpty   = errors.New("jwt key is not empty")
-	ErrJWTKeyTooShort   = errors.New("jwt key is too short")
-	ErrJWTExpireInvalid = errors.New("jwt expire is invalid")
+	ErrJWTInvalid       = ecode.New(202005, "invalid token", codes.Unauthenticated)
+	ErrJWTParamsInvalid = ecode.New(202006, "invalid params", codes.InvalidArgument)
+	ErrJWTKeyNotEmpty   = ecode.New(202007, "jwt key is empty", codes.InvalidArgument)
+	ErrJWTKeyTooShort   = ecode.New(202008, "jwt key is too short", codes.InvalidArgument)
+	ErrJWTExpireInvalid = ecode.New(202009, "jwt expire is invalid", codes.InvalidArgument)
 )
 
 // 定义验证相关的错误
 var (
-	ErrUsernameRequired = errors.New("username is required")
-	ErrUsernameInvalid  = errors.New("username must be 3-20 characters and contain only letters, numbers and underscores")
+	ErrUsernameRequired = ecode.New(202010, "username is required", codes.InvalidArgument)
+	ErrUsernameInvalid  = ecode.New(202011, "invalid username format", codes.InvalidArgument)
 
-	ErrEmailRequired = errors.New("email is required")
-	ErrEmailInvalid  = errors.New("invalid email format")
+	ErrEmailRequired = ecode.New(202012, "email is required", codes.InvalidArgument)
+	ErrEmailInvalid  = ecode.New(202013, "invalid email format", codes.InvalidArgument)
 
-	ErrPhoneRequired = errors.New("phone number is required")
-	ErrPhoneInvalid  = errors.New("invalid phone number format")
+	ErrPhoneRequired = ecode.New(202014, "phone number is required", codes.InvalidArgument)
+	ErrPhoneInvalid  = ecode.New(202015, "invalid phone number format", codes.InvalidArgument)
 
-	ErrPasswordRequired = errors.New("password is required")
-	ErrPasswordInvalid  = errors.New("password must be 6-20 characters and contain both letters and numbers")
+	ErrPasswordRequired = ecode.New(202016, "password is required", codes.InvalidArgument)	
+	ErrPasswordInvalid  = ecode.New(202017, "invalid password format", codes.InvalidArgument)
 )
+
