@@ -116,7 +116,7 @@ func (a *Server) Run() []error {
 		log.Printf("Admin servers starting: %s", a.admin_srv.Addr)
 		// 启动 HTTP 服务器
 		if err := a.admin_srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			srvErrs = append(srvErrs, fmt.Errorf("Admin server failed to serve: %w", err))
+			srvErrs = append(srvErrs, fmt.Errorf("admin server failed to serve: %w", err))
 		}
 	})
 
@@ -127,8 +127,9 @@ func (a *Server) Run() []error {
 		ctx, cancle := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancle()
 		if err := a.admin_srv.Shutdown(ctx); err != nil {
-			srvErrs = append(srvErrs, fmt.Errorf("Admin server shutdown error: %w", err))
+			srvErrs = append(srvErrs, fmt.Errorf("admin server shutdown error: %w", err))
 		}
+
 	})
 	wg.Wait()
 	return srvErrs
@@ -154,6 +155,7 @@ func main() {
 	srvErrs := app.Run()
 	for _, err := range srvErrs {
 		log.Printf("run app error: %v\n", err)
+		panic(err)
 	}
 
 }

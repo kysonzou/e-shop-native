@@ -89,16 +89,13 @@ func (uc *userUsecase) Login(ctx context.Context, username, password string) (*U
 	// 1. 获取用户信息
 	user, err := uc.repo.FindByUsername(ctx, username)
 	if err != nil {
-		if errors.Is(err, apperrors.ErrUserNotFound) {
-			return nil, apperrors.ErrUserNotFound
-		}
 		return nil, err
 	}
 
 	// 2. 验证密码
 	ok := uc.bcrypt.Virefy(password, user.Password)
 	if !ok {
-		return nil, apperrors.ErrPasswordInvalid
+		return nil, apperrors.ErrPasswordIncorrect
 	}
 
 	user.Password = password
@@ -110,9 +107,6 @@ func (uc *userUsecase) GetMyProfile(ctx context.Context, userID uint) (*User, er
 	// 1. 获取用户信息
 	user, err := uc.repo.FindByID(ctx, userID)
 	if err != nil {
-		if errors.Is(err, apperrors.ErrUserNotFound) {
-			return nil, apperrors.ErrUserNotFound
-		}
 		return nil, err
 	}
 

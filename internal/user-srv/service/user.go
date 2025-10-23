@@ -70,7 +70,7 @@ func (s *UserService) GetMyProfile(ctx context.Context, req *v1.GetMyProfileRequ
 	//读取Token
 	claims, ok := auth.FromContext(ctx)
 	if !ok {
-		return nil, apperrors.ErrJWTInvalid
+		return nil, apperrors.ErrTokenInvalid
 	}
 
 	user, err := s.uc.GetMyProfile(ctx, claims.Id)

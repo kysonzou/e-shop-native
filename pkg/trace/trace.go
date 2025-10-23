@@ -12,7 +12,7 @@ func NewTraceID() string{
 
 type traceIdKey struct{}
 
-func WithTraceID(ctx context.Context, traceId string) context.Context{
+func ToContext(ctx context.Context, traceId string) context.Context{
 	return context.WithValue(ctx, traceIdKey{}, traceId)
 }
 

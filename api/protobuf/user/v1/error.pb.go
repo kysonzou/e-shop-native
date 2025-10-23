@@ -23,7 +23,7 @@ const (
 
 type UserErr struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -59,11 +59,11 @@ func (*UserErr) Descriptor() ([]byte, []int) {
 	return file_api_protobuf_user_v1_error_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *UserErr) GetCode() int32 {
+func (x *UserErr) GetCode() string {
 	if x != nil {
 		return x.Code
 	}
-	return 0
+	return ""
 }
 
 func (x *UserErr) GetMessage() string {
@@ -79,7 +79,7 @@ const file_api_protobuf_user_v1_error_proto_rawDesc = "" +
 	"\n" +
 	" api/protobuf/user/v1/error.proto\x12\auser.v1\"7\n" +
 	"\aUserErr\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB1Z/github.com/kyson/e-shop/api/protobuf/user/v1;v1b\x06proto3"
 
 var (

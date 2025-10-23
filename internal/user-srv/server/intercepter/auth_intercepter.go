@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
-	//apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

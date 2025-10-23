@@ -43,7 +43,7 @@ func TraceServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
     // 步骤 3: 将 trace_id 注入到 Go 的 context 中
     // 这里就是 context.WithValue 的用武之地。我们创建了一个新的 context，
     // 它携带了 trace_id。
-    newCtx := trace.WithTraceID(ctx, traceID)
+    newCtx := trace.ToContext(ctx, traceID)
 
     // 步骤 4: 调用下一个 handler，并将这个“增强后”的 newCtx 传递下去
     // 从这里开始，这个请求在我们的服务内部的所有函数调用（service, biz, data），

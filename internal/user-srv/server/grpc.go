@@ -15,8 +15,8 @@ func NewGRPCServer(c *conf.Server, src v1.UserServiceServer, auth auth.Auth, log
 	// options
 	opts := grpc.ChainUnaryInterceptor(
 		intercepter.TraceServerInterceptor,
-		intercepter.RecoverInterceptor(log),
 		intercepter.LoggingInterceptor,
+		intercepter.RecoverInterceptor(log),
 		intercepter.MetricsInterceptor,
 		intercepter.AuthInterceptor(auth),
 		intercepter.ErrorInterceptor,

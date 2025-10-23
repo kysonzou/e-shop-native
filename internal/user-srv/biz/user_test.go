@@ -2,6 +2,7 @@ package biz_test
 
 import (
 	"context"
+	"errors"
 	//"errors"
 	//"errors"
 	//"os/user"
@@ -99,9 +100,9 @@ func TestUserUsecase_RegisterUser(t *testing.T) {
 			},
 			setupMock: func(user *biz.User) {
 				// 验证格式
-				validator.EXPECT().Validate(gomock.Eq(user)).Return(apperrors.ErrPasswordInvalid)
+				validator.EXPECT().Validate(gomock.Eq(user)).Return(apperrors.ErrPasswordFormat)
 			},
-			wantErr: apperrors.ErrPasswordInvalid,
+			wantErr: apperrors.ErrPasswordFormat,
 		}, {
 			name: "用户已存在",
 			user: &biz.User{
@@ -131,9 +132,9 @@ func TestUserUsecase_RegisterUser(t *testing.T) {
 				// 判断是否已经注册
 				repo.EXPECT().FindByUsername(gomock.Any(), user.UserName).Return(nil, apperrors.ErrUserNotFound)
 				// 密码哈希
-				passwordHash.EXPECT().Hash(user.Password).Return("", apperrors.ErrPasswordHash)
+				passwordHash.EXPECT().Hash(user.Password).Return("", errors.New("密码哈希失败"))
 			},
-			wantErr: apperrors.ErrPasswordHash,
+			wantErr: errors.New("密码哈希失败"),
 		}, {
 			name: "创建用户失败",
 			user: &biz.User{
@@ -150,9 +151,9 @@ func TestUserUsecase_RegisterUser(t *testing.T) {
 				// 密码哈希
 				passwordHash.EXPECT().Hash(user.Password).Return("hashed_password", nil)
 				// 创建
-				repo.EXPECT().Create(gomock.Any(), NewUserMatcher(user.UserName, "hashed_password", user.Phone, user.Email)).Return(nil, apperrors.ErrInternal)
+				repo.EXPECT().Create(gomock.Any(), NewUserMatcher(user.UserName, "hashed_password", user.Phone, user.Email)).Return(nil, errors.New("创建用户失败"))
 			},
-			wantErr: apperrors.ErrInternal,
+			wantErr: errors.New("创建用户失败"),
 		},
 	}
 
@@ -216,17 +217,17 @@ func TestUserUsecase_Login(t *testing.T) {
 				passwordHash.EXPECT().Virefy(password, "hashed_password").Return(false)
 			},
 			wantUser: nil,
-			wantErr:  apperrors.ErrPasswordInvalid,
+			wantErr:  apperrors.ErrPasswordIncorrect,
 		},
 		{
 			name:     "数据库错误",
 			username: "testuser",
 			password: "pAssword123",
 			setupMock: func(username, password string) {
-				repo.EXPECT().FindByUsername(gomock.Any(), username).Return(nil, apperrors.ErrInternal)
+				repo.EXPECT().FindByUsername(gomock.Any(), username).Return(nil, errors.New("数据库错误"))
 			},
 			wantUser: nil,
-			wantErr:  apperrors.ErrInternal,
+			wantErr:  errors.New("数据库错误"),
 		},
 	}
 	for _, tt := range tests {
@@ -276,10 +277,10 @@ func TestUserUsecase_GetMyProfile(t *testing.T) {
 			name:   "数据库错误",
 			userID: 3,
 			setupMock: func(userID uint) {
-				repo.EXPECT().FindByID(gomock.Any(), userID).Return(nil, apperrors.ErrInternal)
+				repo.EXPECT().FindByID(gomock.Any(), userID).Return(nil, errors.New("数据库错误"))
 			},
 			wantUser: nil,
-			wantErr:  apperrors.ErrInternal,
+			wantErr:  errors.New("数据库错误"),
 		},
 	}
 	for _, tt := range tests {

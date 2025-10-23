@@ -22,7 +22,7 @@ func RecoverInterceptor(log *zap.Logger) grpc.UnaryServerInterceptor {
 				)
 				// 返回一个grpc标准错误（这里使用的是命名返回值的形式）
 				// 等同于 return nil, err
-				err = status.Errorf(codes.Internal, "internal server error")
+				err = status.Errorf(codes.Internal, "内部服务错误")
 			}
 		}()
 		// 正常调用下一个handler

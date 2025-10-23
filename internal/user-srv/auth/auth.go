@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
@@ -35,16 +36,7 @@ type Auth interface {
 	GetAlgorithm() jwt.SigningMethod
 }
 
-func NewAuth(c *conf.Auth) (Auth, error) {
-	if c.JwtKey == "" {
-		return nil, apperrors.ErrJWTKeyNotEmpty
-	}
-	if len(c.JwtKey) < 32 {
-		return nil, apperrors.ErrJWTKeyTooShort
-	}
-	if c.ExpireDuration <= 0 {
-		return nil, apperrors.ErrJWTExpireInvalid
-	}
+func NewAuth(c *conf.Auth) Auth {
 	var algorithm jwt.SigningMethod
 	switch c.Algorithm {
 	case "HS256":
@@ -62,13 +54,10 @@ func NewAuth(c *conf.Auth) (Auth, error) {
 		algorithm:      algorithm,
 		whitelist:      c.Whitelist,
 	}
-	return authIMP, nil
+	return authIMP
 }
 
 func (auth *AuthIMP) GenerateToken(ctx context.Context, id uint, userName string) (string, error) {
-	if id <= 0 || userName == "" {
-		return "", apperrors.ErrJWTParamsInvalid
-	}
 	expirationTime := time.Now().Add(auth.expireDuration) // 每次生成时计算
 	claims := Claims{
 		Id:       id,
@@ -80,7 +69,7 @@ func (auth *AuthIMP) GenerateToken(ctx context.Context, id uint, userName string
 
 	token := jwt.NewWithClaims(auth.algorithm, claims)  // 计算claims "指纹"
 	tokenString, err := token.SignedString(auth.jwtKey) // 密钥签名
-	return tokenString, err
+	return tokenString, fmt.Errorf("failed to generate token: %w", err)
 }
 
 // ParseToken 解析并验证一个 JWT 字符串
@@ -88,13 +77,13 @@ func (auth *AuthIMP) ParseAndSaveToken(ctx context.Context, tokenS string) (cont
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenS, claims, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, apperrors.ErrJWTInvalid
+			return nil, apperrors.ErrTokenInvalid
 		}
 		return auth.jwtKey, nil
 	})
-	if err != nil || !token.Valid {
-		return ctx, apperrors.ErrJWTInvalid
-	}
+	if !token.Valid { return ctx, apperrors.ErrTokenExpired }
+	if err != nil { return ctx, apperrors.ErrTokenInvalid }
+	
 
 	return ToContext(ctx, claims), nil
 }

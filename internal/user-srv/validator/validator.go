@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"fmt"
 	"regexp"
 	"sync"
 
@@ -11,8 +12,8 @@ import (
 
 type ValidatorUsecase struct{}
 
-func NewValidator() (biz.UserValidator, error) {
-	return &ValidatorUsecase{}, nil
+func NewValidator() biz.UserValidator {
+	return &ValidatorUsecase{}
 }
 
 func (v *ValidatorUsecase) Validate(user *biz.User) error {
@@ -49,7 +50,7 @@ func getValidator() (*validator.Validate, error) {
 		}
 		err = validate.RegisterValidation("phone", ValidatePhone)
 	})
-	return validate, err
+	return validate, fmt.Errorf("failed to register validation: %w", err)
 }
 
 func ValidateUsername(fl validator.FieldLevel) bool {
@@ -104,15 +105,12 @@ func ValidatePhone(fl validator.FieldLevel) bool {
 
 // 错误判断转换
 func TranslateValidationError(err error) error {
-	if err == nil {
-		return nil
-	}
 	if errs, ok := err.(validator.ValidationErrors); ok {
 		for _, e := range errs {
 			return translateFieldError(e)
 		}
 	}
-	return err
+	return fmt.Errorf("failed to translate validation error: %w", err)
 }
 
 func translateFieldError(fe validator.FieldError) error {
@@ -120,41 +118,47 @@ func translateFieldError(fe validator.FieldError) error {
 	case "UserName":
 		switch fe.Tag() {
 		case "required":
-			return apperrors.ErrUsernameRequired
+			return apperrors.ErrUsernameFormat.WithMessage("用户名不能为空")
+		case "min":
+			return apperrors.ErrUsernameFormat.WithMessage("用户名长度不能小于3个字符")
+		case "max":
+			return apperrors.ErrUsernameFormat.WithMessage("用户名长度不能大于20个字符")
 		case "username":
-			return apperrors.ErrUsernameInvalid
+			return apperrors.ErrUsernameFormat.WithMessage("用户名格式错误,支持字母、数字、下划线")
 		default:
-			return apperrors.ErrUsernameInvalid
+			return apperrors.ErrUsernameFormat
 		}
 	case "Password":
 		switch fe.Tag() {
 		case "required":
-			return apperrors.ErrPasswordRequired
+			return apperrors.ErrPasswordFormat.WithMessage("密码不能为空")
+		case "min":
+			return apperrors.ErrPasswordFormat.WithMessage("密码长度不能小于8个字符")
+		case "max":
+			return apperrors.ErrPasswordFormat.WithMessage("密码长度不能大于64个字符")
 		case "password":
-			return apperrors.ErrPasswordInvalid
+			return apperrors.ErrPasswordFormat.WithMessage("密码格式错误,支持字母、数字、特殊字符,且必须包含大小写字母和数字")
 		default:
-			return apperrors.ErrPasswordInvalid
+			return apperrors.ErrPasswordFormat
 		}
 	case "Phone":
 		switch fe.Tag() {
 		case "required":
-			return apperrors.ErrPhoneRequired
-		case "len":
-			return apperrors.ErrPhoneInvalid
+			return apperrors.ErrPhoneFormat.WithMessage("手机号不能为空")
 		case "phone":
-			return apperrors.ErrPhoneInvalid
+			return apperrors.ErrPhoneFormat
 		default:
-			return apperrors.ErrPhoneInvalid
+			return apperrors.ErrPhoneFormat
 		}
 	case "Email":
 		switch fe.Tag() {
 		case "required":
-			return apperrors.ErrEmailRequired
+			return apperrors.ErrEmailFormat.WithMessage("邮箱不能为空")
 		case "email":
-			return apperrors.ErrEmailInvalid
+			return apperrors.ErrEmailFormat.WithMessage("邮箱格式错误")
 		default:
-			return apperrors.ErrEmailInvalid
+			return apperrors.ErrEmailFormat
 		}
 	}
-	return fe
+	return fmt.Errorf("failed to translate field error: %w", fe)
 }

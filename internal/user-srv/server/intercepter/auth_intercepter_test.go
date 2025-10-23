@@ -25,8 +25,8 @@ func TestAuthInterceptor_Unit(t *testing.T) {
 		ExpireDuration: 3600,
 		Whitelist:      []string{"/test.Service/PublicMethod"},
 	}
-	authInstance, err := auth.NewAuth(mockConfig)
-	require.NoError(t, err)
+	authInstance := auth.NewAuth(mockConfig)
+
 
 	// 获取拦截器函数
 	interceptor := intercepter.AuthInterceptor(authInstance)

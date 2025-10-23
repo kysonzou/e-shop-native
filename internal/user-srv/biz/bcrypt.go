@@ -1,7 +1,8 @@
 package biz
 
 import (
-	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
+	"fmt"
+	
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,7 +15,7 @@ func NewBcrypt() PasswordHash {
 func (b *Bcrypt) Hash(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", apperrors.ErrPasswordHash
+		return "", fmt.Errorf("failed to hash password: %w", err)
 	}
 	return string(hashedPassword), nil
 }

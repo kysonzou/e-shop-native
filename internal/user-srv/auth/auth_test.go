@@ -8,11 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	//"github.com/kyson/e-shop-native/internal/user-srv/auth"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
-
-import "github.com/golang-jwt/jwt/v5"
 
 // type fakeAuthOptions func (*conf.Auth);
 
@@ -67,7 +66,7 @@ import "github.com/golang-jwt/jwt/v5"
 // }
 
 // 测试NewAuth函数
-func TestNewAuth(t *testing.T) {
+func TestGetter(t *testing.T) {
 	tests := []struct {
 		name           string
 		config         *conf.Auth
@@ -86,62 +85,16 @@ func TestNewAuth(t *testing.T) {
 			},
 			Algorithm:      jwt.SigningMethodHS512,
 			ExpireDuration: time.Second * time.Duration(3600),
-			wantAuth:       true,
-			wantErr:        nil,
-		}, {
-			name: "生成auth成功,不给默认算法",
-			config: &conf.Auth{
-				JwtKey:         "ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm4isbTs8y29Zs=",
-				ExpireDuration: 300,
-				Whitelist:      []string{"/user/register", "/user/login", "/user/profile"},
-			},
-			Algorithm:      jwt.SigningMethodHS256,
-			ExpireDuration: time.Second * time.Duration(300),
-			wantAuth:       true,
-			wantErr:        nil,
-		}, {
-			name: "生成auth失败,给空Key",
-			config: &conf.Auth{
-				Algorithm:      "HS256",
-				JwtKey:         "",
-				ExpireDuration: 3600,
-				Whitelist:      []string{"/user/register", "/user/login"},
-			},
-			wantAuth: false,
-			wantErr:  apperrors.ErrJWTKeyNotEmpty,
-		}, {
-			name: "生成auth失败,给一个短Key",
-			config: &conf.Auth{
-				Algorithm:      "HS256",
-				JwtKey:         "ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm",
-				ExpireDuration: 3600,
-				Whitelist:      []string{"/user/register", "/user/login"},
-			},
-			wantAuth: false,
-			wantErr:  apperrors.ErrJWTKeyTooShort,
-		}, {
-			name: "生成auth失败,给一个过期时间",
-			config: &conf.Auth{
-				Algorithm:      "HS256",
-				JwtKey:         "ahkPzSJ6auFD2WZHt5NFfixFSI3JmXm4isbTs8y29Zs=",
-				ExpireDuration: 0,
-				Whitelist:      []string{"/user/register", "/user/login"},
-			},
-			wantAuth: false,
-			wantErr:  apperrors.ErrJWTExpireInvalid,
 		},
 	}
 
 	for _, tt := range tests {
-		auth, err := NewAuth(tt.config)
-		assert.Equal(t, tt.wantAuth, auth != nil)
-		assert.Equal(t, tt.wantErr, err)
-		if err == nil {
-			assert.Equal(t, tt.config.JwtKey, string(auth.GetJWTKey()))
-			assert.Equal(t, tt.Algorithm, auth.GetAlgorithm())
-			assert.Equal(t, tt.ExpireDuration, auth.GetExpireDuration())
-			assert.Equal(t, tt.config.Whitelist, auth.GetWhiteList())
-		}
+		auth := NewAuth(tt.config)
+		assert.Equal(t, tt.config.JwtKey, string(auth.GetJWTKey()))
+		assert.Equal(t, tt.Algorithm, auth.GetAlgorithm())
+		assert.Equal(t, tt.ExpireDuration, auth.GetExpireDuration())
+		assert.Equal(t, tt.config.Whitelist, auth.GetWhiteList())
+		
 	}
 }
 
@@ -169,26 +122,11 @@ func TestGenerateToken(t *testing.T) {
 			config:    config,
 			wantToken: true,
 			wantErr:   nil,
-		}, {
-			name:      "生成Token失败，uid为0",
-			uid:       0,
-			userName:  "testUser",
-			config:    config,
-			wantToken: false,
-			wantErr:   apperrors.ErrJWTParamsInvalid,
-		}, {
-			name:      "生成Token失败，username为空",
-			uid:       1,
-			userName:  "",
-			config:    config,
-			wantToken: false,
-			wantErr:   apperrors.ErrJWTParamsInvalid,
 		},
 	}
 
 	for _, tt := range tests {
-		auth, err := NewAuth(tt.config)
-		assert.NoError(t, err)
+		auth := NewAuth(tt.config)
 		token, err := auth.GenerateToken(context.Background(), tt.uid, tt.userName)
 		assert.Equal(t, tt.wantToken, token != "")
 		assert.Equal(t, tt.wantErr, err)
@@ -238,17 +176,16 @@ func TestParseToken(t *testing.T) {
 		}, {
 			name:        "被修改的token解析失败",
 			tokenString: editTokenString,
-			wantErr:     apperrors.ErrJWTInvalid,
+			wantErr:     apperrors.ErrTokenInvalid,
 		}, {
 			name:        "过期的token解析失败",
 			tokenString: expireTokenString,
-			wantErr:     apperrors.ErrJWTInvalid,
+			wantErr:     apperrors.ErrTokenInvalid,
 		},
 	}
 
 	for _, tt := range tests {
-		auth, err := NewAuth(config)
-		assert.NoError(t, err)
+		auth := NewAuth(config)
 
 		ctx, err := auth.ParseAndSaveToken(context.Background(), tt.tokenString)
 		assert.Equal(t, tt.wantErr, err)
@@ -270,8 +207,7 @@ func TestPath(t *testing.T) {
 		ExpireDuration: 3600,
 		Whitelist:      []string{"/user/register", "/user/login"},
 	}
-	auth, err := NewAuth(&config)
-	assert.NoError(t, err)
+	auth := NewAuth(&config)
 
 	tokenString, err := auth.GenerateToken(context.Background(), 1, "testUser")
 	assert.NoError(t, err)

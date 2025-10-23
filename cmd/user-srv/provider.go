@@ -39,13 +39,13 @@ func LoadConfig() (*conf.Bootstrap, error) {
 
 	// 读取配置文件
 	if err := v.ReadInConfig(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	// 将配置 unmarshal 到 conf.Bootstrap
 	var bc conf.Bootstrap
 	if err := v.Unmarshal(&bc); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
 	return &bc, nil

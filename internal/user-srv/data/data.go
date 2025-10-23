@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
@@ -22,16 +23,16 @@ func NewData(s *conf.Data) (*Data, func(), error) {
 	// Initialize your Data struct here using the MySQL configuration
 	db, err := gorm.Open(mysql.Open(s.MySQL.DSN), &gorm.Config{})
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to connect to MySQL: %w", err)
 	}
 
 	// 判断数据库连接是否成功
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to get database connection: %w", err)
 	}
 	if err := sqlDB.Ping(); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	// 设置数据库链接池参数

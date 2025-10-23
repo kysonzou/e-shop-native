@@ -29,19 +29,11 @@ func InitializeApp() (*App, func(), error) {
 		return nil, nil, err
 	}
 	userRepo := data.NewUserRepo(dataData)
-	userValidator, err := validator.NewValidator()
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
+	userValidator := validator.NewValidator()
 	passwordHash := biz.NewBcrypt()
 	userService := biz.NewUserUsecase(userRepo, userValidator, passwordHash)
 	confAuth := ProvideAuthConfig(bootstrap)
-	authAuth, err := auth.NewAuth(confAuth)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
+	authAuth := auth.NewAuth(confAuth)
 	userServiceServer := service.NewUserService(userService, authAuth)
 	log := ProvideLogConfig(bootstrap)
 	logger, err := NewLogger(log)

@@ -8,7 +8,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
+	//"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -22,27 +22,27 @@ func CustomErrorHandle (logger *zap.Logger) func(ctx context.Context, mux *runti
 		s := status.Convert(err)
 
 		// 2. 从 status 中提取 gRPC code 和 message
-		code := s.Code()
+		code := s.Code().String()
 		msg := s.Message()
 
 		// 尝试从 status 中提取 details。
 		// 在我们的 ErrorInterceptor 中，我们将 ecode.Detail() 作为 details 附加了。
 		if len(s.Details()) > 0 {
 			details := s.Details()[0]
-			usr_err, ok := details.(*v1.UserErr)
+			biz_err, ok := details.(*v1.UserErr)
 			if ok {
-				code = codes.Code(usr_err.Code)
-				msg = usr_err.Message
+				code = biz_err.Code
+				msg = biz_err.Message
 			}
 		}
 
 		// 3. 将 gRPC code 映射为 HTTP status code
-		httpStatus := runtime.HTTPStatusFromCode(code)
+		httpStatus := runtime.HTTPStatusFromCode(s.Code())
 
 		// 4. 组装自定义的 JSON 错误响应体
 		// 这个结构可以根据您的前端需求进行调整
 		customErr := struct {
-			Code    codes.Code  `json:"code"`
+			Code    string  `json:"code"`
 			Message string      `json:"message,omitempty"`
 		}{
 			Code:    code,

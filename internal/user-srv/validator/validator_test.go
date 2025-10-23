@@ -195,7 +195,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Phone:    "13800138000",
 				Email:    "test@example.com",
 			},
-			wantErr: apperrors.ErrUsernameRequired,
+			wantErr: apperrors.ErrUsernameFormat.WithMessage("用户名不能为空"),
 		},
 		{
 			name: "用户名格式错误",
@@ -203,7 +203,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Password: "pAssword123",
 				Phone:    "13800138000",
 				Email:    "test@example.com"},
-			wantErr: apperrors.ErrUsernameInvalid,
+			wantErr: apperrors.ErrUsernameFormat.WithMessage("用户名格式错误,支持字母、数字、下划线"),
 		},
 		{
 			name: "密码为空",
@@ -211,7 +211,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Password: "",
 				Phone:    "13800138000",
 				Email:    "test@example.com"},
-			wantErr: apperrors.ErrPasswordRequired,
+			wantErr: apperrors.ErrPasswordFormat.WithMessage("密码不能为空"),
 		},
 		{
 			name: "密码格式错误",
@@ -220,7 +220,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Phone:    "13800138000",
 				Email:    "test@example.com",
 			},
-			wantErr: apperrors.ErrPasswordInvalid,
+			wantErr: apperrors.ErrPasswordFormat.WithMessage("密码格式错误,支持字母、数字、特殊字符,且必须包含大小写字母和数字"),
 		},
 		{
 			name: "手机号为空",
@@ -228,7 +228,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Password: "pAssword123",
 				Phone:    "",
 				Email:    "test@example.com"},
-			wantErr: apperrors.ErrPhoneRequired,
+			wantErr: apperrors.ErrPhoneFormat.WithMessage("手机号不能为空"),
 		},
 		{
 			name: "手机号格式错误",
@@ -236,7 +236,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Password: "pAssword123",
 				Phone:    "1380013800",
 				Email:    "test@example.com"},
-			wantErr: apperrors.ErrPhoneInvalid,
+			wantErr: apperrors.ErrPhoneFormat.WithMessage("手机号格式错误"),
 		},
 		{
 			name: "邮箱为空",
@@ -244,7 +244,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Password: "pAssword123",
 				Phone:    "13800138000",
 				Email:    ""},
-			wantErr: apperrors.ErrEmailRequired,
+			wantErr: apperrors.ErrEmailFormat.WithMessage("邮箱不能为空"),
 		},
 		{
 			name: "邮箱格式错误",
@@ -252,7 +252,7 @@ func TestTranslateValidationError(t *testing.T) {
 				Password: "pAssword123",
 				Phone:    "13800138000",
 				Email:    "test@example"},
-			wantErr: apperrors.ErrEmailInvalid,
+			wantErr: apperrors.ErrEmailFormat.WithMessage("邮箱格式错误"),
 		},
 	}
 
@@ -264,7 +264,7 @@ func TestTranslateValidationError(t *testing.T) {
 			}
 			err = validate.Struct(tt.user)
 			err = TranslateValidationError(err)
-			if err != tt.wantErr {
+			if err.Error() != tt.wantErr.Error() {
 				t.Errorf("TranslateValidationError() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -273,8 +273,7 @@ func TestTranslateValidationError(t *testing.T) {
 
 // GoodPath
 func TestValidator(t *testing.T) {
-	validate, err := NewValidator()
-	assert.NoError(t, err)
+	validate := NewValidator()
 	assert.NotNil(t, validate)
 
 	user := &biz.User{
@@ -284,6 +283,6 @@ func TestValidator(t *testing.T) {
 		Email:    "test@example.com",
 	}
 
-	err = validate.Validate(user)
+	err := validate.Validate(user)
 	assert.NoError(t, err)
 }

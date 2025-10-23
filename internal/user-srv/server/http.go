@@ -34,8 +34,8 @@ func NewHTTPServer(c *conf.Server, logger *zap.Logger) *BusinessHTTPServer {
 	chi := chi.NewRouter()
 	//chi.Use() //可以挂载各种中间件
 	chi.Use(middleware.TraceMiddleware)
-	chi.Use(chiMiddleware.Recoverer) // 终极保护，必须在最外层之一，捕获一切panic
 	chi.Use(chiMiddleware.Logger)    // 记录请求的完整生命周期
+	chi.Use(chiMiddleware.Recoverer) // 终极保护，必须在最外层之一，捕获一切panic
 	chi.Use(middleware.MetricsMiddleware) // 指标
 
 	chi.Mount("/", mux) //把gateway挂载到chi上，也就是请求先到chi，然后chi再根据这里的挂载规则转发到gateway
