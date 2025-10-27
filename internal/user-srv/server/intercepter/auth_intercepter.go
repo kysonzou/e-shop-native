@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/kyson/e-shop-native/internal/user-srv/auth"
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -32,28 +31,28 @@ func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {
 		// 解析token
 		md, ok := metadata.FromIncomingContext(ctx)
 		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "authentication required")
+			return nil, apperrors.ErrTokenInvalid.WithMessage("authentication required").GrpcError()
 		}
 
 		authHeaders := md.Get(AuthorizationHeader)
 		if len(authHeaders) == 0 {
-			return nil, status.Errorf(codes.Unauthenticated, "authentication required")
+			return nil, apperrors.ErrTokenInvalid.WithMessage("authentication required").GrpcError()
 		}
 
 		parts := strings.Split(authHeaders[0], " ")
 		if len(parts) != 2 || parts[0] != BearerScheme {
-			return nil, status.Errorf(codes.Unauthenticated, "invalid token format")
+			return nil, apperrors.ErrTokenInvalid.WithMessage("invalid token format").GrpcError()
 		}
 
 		tokenString := parts[1]
 		if tokenString == "" {
-			return nil, status.Errorf(codes.Unauthenticated, "token is empty")
+			return nil, apperrors.ErrTokenInvalid.WithMessage("token is empty").GrpcError()
 		}
 
 		// 判断token的
 		ctx, err = a.ParseAndSaveToken(ctx, tokenString)
 		if err != nil {
-			return nil, status.Errorf(codes.Unauthenticated, "invalid or expired token")
+			return nil, apperrors.ErrTokenInvalid.WithMessage("invalid or expired token")
 		}
 
 		return handler(ctx, req)

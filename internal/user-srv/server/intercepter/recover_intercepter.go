@@ -7,8 +7,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 
 func RecoverInterceptor(log *zap.Logger) grpc.UnaryServerInterceptor {
@@ -20,9 +19,8 @@ func RecoverInterceptor(log *zap.Logger) grpc.UnaryServerInterceptor {
 					zap.Any("panic", r),
 					zap.String("stacktrace", string(debug.Stack())),
 				)
-				// 返回一个grpc标准错误（这里使用的是命名返回值的形式）
-				// 等同于 return nil, err
-				err = status.Errorf(codes.Internal, "内部服务错误")
+				// 返回一个grpc标准错误（这里使用的是命名返回值的形式）, 等同于 return nil, err
+				err = apperrors.ErrInternal.GrpcError()
 			}
 		}()
 		// 正常调用下一个handler

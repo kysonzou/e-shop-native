@@ -41,28 +41,26 @@ func CustomErrorHandle (logger *zap.Logger) func(ctx context.Context, mux *runti
 
 		// 4. 组装自定义的 JSON 错误响应体
 		// 这个结构可以根据您的前端需求进行调整
-		customErr := struct {
-			Code    string  `json:"code"`
-			Message string      `json:"message,omitempty"`
-		}{
+		httpErr := &v1.UserErr{
 			Code:    code,
 			Message: msg,
 		}
 
 		// 5. 使用 marshaler 将自定义错误结构序列化为 JSON
 		// 设置响应体数据类型JOSN
-		w.Header().Set("Content-Type", marshaler.ContentType(customErr)) 
+		w.Header().Set("Content-Type", marshaler.ContentType(httpErr)) 
 
 		// 设置HTTP status code
 		w.WriteHeader(httpStatus)
 		
 		// 使用 marshaler 将我们自定义的 httpErr 结构体序列化成 JSON 字符串，并写入到 HTTP 响应体中。
 		// 这里还考虑如果JOSN序列化失败的回退
-		const fallbackErrorResponse = `{"code":-1, "message":"An internal error occurred while processing the error response"}`
-		if err := marshaler.NewEncoder(w).Encode(customErr); err != nil { 
+		if err := marshaler.NewEncoder(w).Encode(httpErr); err != nil { 
 			logger.Error("Failed to marshal and write error response", zap.Error(err))
 			// 如果序列化失败，提供一个最终的回退
 			w.WriteHeader(http.StatusInternalServerError)
+
+			const fallbackErrorResponse = `{"code":-1, "message":"An internal error occurred while processing the error response"}`
 			if _, wErr := io.WriteString(w, fallbackErrorResponse); wErr != nil {
 				logger.Error("Failed to write fallback error response", zap.Error(err))
 			}

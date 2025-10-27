@@ -10,6 +10,7 @@ import (
 
 const TraceIDKey = "X-Trace-ID"
 
+// GRPC 服务端解析trace_id 并且注入到context中
 func TraceServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
     // 步骤 1: 从传入的 context 中提取 gRPC metadata
     // gRPC 框架已经帮我们把请求头解析好，并放在了 context 中。
@@ -51,6 +52,7 @@ func TraceServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
     return handler(newCtx, req)
 }
 
+// GRPC 客户端注入trace_id然后传给服务端
 func TraceClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
     // 步骤 1: 从当前 Go 的 context 中提取 trace_id
     // 这个 trace_id 是在入站拦截器中被放进去的。

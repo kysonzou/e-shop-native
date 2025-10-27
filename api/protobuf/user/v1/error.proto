@@ -7,3 +7,4 @@ message UserErr {
   string code = 1;         
   string message = 2;  
 }
+
