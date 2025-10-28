@@ -188,6 +188,14 @@ buf-config-init:
 	@$(BUF_PATH) config init
 	@echo "<< Buf configuration initialized."
 
+# ====================================================================================
+# npm
+# ====================================================================================
+.PHONY: npm-install
+npm-install:
+	@echo ">> Installing npm packages..."
+	@npm install
+	@echo "<< Npm packages installed."
 
 # ====================================================================================
 # 工具与清理 (Utilities & Cleanup)

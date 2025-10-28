@@ -14,9 +14,6 @@
 
 # 可执行产物
 e-shop-server
-bin/
-node_modules/
-.husky/
 
 # IDE & 编辑器
 .idea/
@@ -35,4 +32,8 @@ Thumbs.db
 # 临时文件
 tmp/
 third_party/
+bin/
+node_modules/
+.husky/
+.direnv/
 GEMINI.md
