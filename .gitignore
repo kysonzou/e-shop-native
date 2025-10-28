@@ -34,6 +34,6 @@ tmp/
 third_party/
 bin/
 node_modules/
-.husky/
+# .husky/ 这个文件有钩子的实现，不能忽略
 .direnv/
 GEMINI.md

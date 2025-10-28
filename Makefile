@@ -189,13 +189,28 @@ buf-config-init:
 	@echo "<< Buf configuration initialized."
 
 # ====================================================================================
-# npm
+# 安装 Git hooks（脚本版本）
 # ====================================================================================
-.PHONY: npm-install
-npm-install:
-	@echo ">> Installing npm packages..."
-	@npm install
-	@echo "<< Npm packages installed."
+.PHONY: install-hooks
+install-hooks:
+	@echo ">> installing git hooks..."
+	@mkdir -p .git/hooks
+	@chmod +x scripts/pre-commit.sh
+	@chmod +x scripts/commit-msg.sh
+	@ln -sf ../../scripts/pre-commit.sh .git/hooks/pre-commit
+	@ln -sf ../../scripts/commit-msg.sh .git/hooks/commit-msg
+	@echo "<< git hooks installed"
+	@echo ""
+	@echo "✓ Git hooks installed successfully!"
+# 卸载
+.PHONY: uninstall-hooks
+uninstall-hooks:
+	@echo ">> uninstalling git hooks..."
+	@rm -f .git/hooks/pre-commit
+	@rm -f .git/hooks/commit-msg
+	@echo "<< git hooks uninstalled"
+	@echo ""
+	@echo "✓ Git hooks uninstalled successfully!"
 
 # ====================================================================================
 # 工具与清理 (Utilities & Cleanup)
