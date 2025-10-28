@@ -27,7 +27,6 @@ func TestAuthInterceptor_Unit(t *testing.T) {
 	}
 	authInstance := auth.NewAuth(mockConfig)
 
-
 	// 获取拦截器函数
 	interceptor := intercepter.AuthInterceptor(authInstance)
 
@@ -80,7 +79,8 @@ func TestAuthInterceptor_Unit(t *testing.T) {
 			name:       "Protected method with valid token should pass and inject claims",
 			fullMethod: "/test.Service/ProtectedMethod",
 			ctx: func() context.Context {
-				token, _ := authInstance.GenerateToken(context.Background(), 42, "testuser")
+				token, err := authInstance.GenerateToken(context.Background(), 42, "testuser")
+				assert.NoError(t, err)
 				return metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer "+token))
 			}(),
 			handlerShouldBeCalled: true,

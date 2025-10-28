@@ -3,8 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 )
 
 func NewAdminServer(c *conf.Server) *AdminHTTPServer {

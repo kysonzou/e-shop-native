@@ -8,6 +8,7 @@ import (
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 )
 
@@ -81,9 +82,12 @@ func (auth *AuthIMP) ParseAndSaveToken(ctx context.Context, tokenS string) (cont
 		}
 		return auth.jwtKey, nil
 	})
-	if !token.Valid { return ctx, apperrors.ErrTokenExpired }
-	if err != nil { return ctx, apperrors.ErrTokenInvalid }
-	
+	if !token.Valid {
+		return ctx, apperrors.ErrTokenExpired
+	}
+	if err != nil {
+		return ctx, apperrors.ErrTokenInvalid
+	}
 
 	return ToContext(ctx, claims), nil
 }

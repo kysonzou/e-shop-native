@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 

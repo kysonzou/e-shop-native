@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"sync"
 
-	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
 )
 
-type Code interface{
+type Code interface {
 	error
 	Code() string
 	Message() string
@@ -20,10 +21,9 @@ type Code interface{
 	WithError(err error) Code
 	// 为了实现errors 的As和Is
 	Unwrap() error
-
 }
 
-type ecode struct{
+type ecode struct {
 	// 错误码，业务唯一
 	code string
 	// 错误信息，用于展示给用户，只给出业务错误，内部错不绝对不要暴露给外部
@@ -34,36 +34,36 @@ type ecode struct{
 	err error
 }
 
-var(
+var (
 	_errors = make(map[string]Code)
-	_mux = sync.Mutex{}
+	_mux    = sync.Mutex{}
 )
 
 func New(code string, message string, grpccode codes.Code) Code {
 	_mux.Lock()
 	defer _mux.Unlock()
 
-	if _, ok := _errors[code]; ok{
+	if _, ok := _errors[code]; ok {
 		panic("error code already exists")
 	}
 
 	e := &ecode{
-		code: code,
-		message: message,
+		code:     code,
+		message:  message,
 		grpccode: grpccode,
 	}
 	_errors[code] = e
 	return e
 }
 
-func (e *ecode) Error() string { 
+func (e *ecode) Error() string {
 	if e.err != nil {
 		return fmt.Sprintf("error: code=%s, message=%s, err=%v", e.code, e.message, e.err)
 	}
 	return fmt.Sprintf("error: code=%s, message=%s", e.code, e.message)
 }
-func (e *ecode) Code() string { return e.code }
-func (e *ecode) Message() string { return e.message }
+func (e *ecode) Code() string         { return e.code }
+func (e *ecode) Message() string      { return e.message }
 func (e *ecode) GrpcCode() codes.Code { return e.grpccode }
 func (e *ecode) GrpcError() error {
 	st := status.New(e.GrpcCode(), e.Message()) // 创建基础 status
@@ -78,32 +78,31 @@ func (e *ecode) GrpcError() error {
 	if detailErr != nil {
 		// 如果附加 detail 失败（虽然很少见），则返回不带 detail 的原始 status 错误
 		// ⚠️ 这里需要完善异常的处理机制
-		return	st.Err()
+		return st.Err()
 	}
-	return	stWithDetails.Err()
+	return stWithDetails.Err()
 }
 
 func (e *ecode) WithMessage(message string) Code {
 	return &ecode{
-		code: e.code,
-		message: message,
+		code:     e.code,
+		message:  message,
 		grpccode: e.grpccode,
-		err: e.err,
+		err:      e.err,
 	}
 }
 func (e *ecode) WithError(err error) Code {
 	return &ecode{
-		code: e.code,
-		message: e.message,
+		code:     e.code,
+		message:  e.message,
 		grpccode: e.grpccode,
-		err: err,
+		err:      err,
 	}
 }
 
 func (e *ecode) Unwrap() error {
 	return e.err
 }
-
 
 // 将一个error 转换为ecode
 func FromError(err error) Code {
@@ -117,8 +116,8 @@ func FromError(err error) Code {
 	st, ok := status.FromError(err)
 	if ok {
 		return &ecode{
-			code: st.Code().String(),
-			message: st.Message(),
+			code:     st.Code().String(),
+			message:  st.Message(),
 			grpccode: st.Code(),
 		}
 	}
@@ -126,8 +125,9 @@ func FromError(err error) Code {
 	// 应该设置一个默认的error
 	return ErrInternal.WithError(err)
 }
+
 // 通用错误
 var (
 	ErrInternal = New(v1.ErrorCode_INTERNAL.String(), "内部错误", codes.Internal)
-	ErrUnknown = New(v1.ErrorCode_UNKNOWN.String(), "未知错误", codes.Unknown)
+	ErrUnknown  = New(v1.ErrorCode_UNKNOWN.String(), "未知错误", codes.Unknown)
 )

@@ -20,7 +20,7 @@ func TraceMiddleware(next http.Handler) http.Handler {
 
 		// 将 trace_id 存入 context
 		ctx := trace.ToContext(r.Context(), traceID)
-		
+
 		// 将带有 trace_id 的新 context 传递下去
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

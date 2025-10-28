@@ -1,0 +1,29 @@
+# Go 二进制与构建文件
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# 可执行产物
+e-shop-server
+bin/
+
+# IDE & 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+
+# 临时文件
+tmp/

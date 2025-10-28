@@ -3,20 +3,15 @@ package biz_test
 import (
 	"context"
 	"errors"
-	//"errors"
-	//"errors"
-	//"os/user"
 	"testing"
 
-	//"github.com/golang-jwt/jwt/v4/request"
+	"github.com/stretchr/testify/assert"
+
 	biz "github.com/kyson/e-shop-native/internal/user-srv/biz"
 	mock "github.com/kyson/e-shop-native/internal/user-srv/biz/mock"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
-	"github.com/stretchr/testify/assert"
 
-	//"github.com/stretchr/testify/require"
-	gomock "go.uber.org/mock/gomock"
-	//"golang.org/x/crypto/bcrypt"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // 定义自定义匹配器类型

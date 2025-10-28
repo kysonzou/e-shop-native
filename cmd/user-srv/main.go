@@ -13,13 +13,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kyson/e-shop-native/internal/user-srv/conf"
-	"github.com/kyson/e-shop-native/internal/user-srv/data"
-	"github.com/kyson/e-shop-native/internal/user-srv/server"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/kyson/e-shop-native/internal/user-srv/conf"
+	"github.com/kyson/e-shop-native/internal/user-srv/data"
+	"github.com/kyson/e-shop-native/internal/user-srv/server"
 )
 
 var flagconf string
@@ -150,7 +151,11 @@ func main() {
 	}
 	defer cleanup()
 
-	migrateDatabase(app.mysql_dsn)
+	err = migrateDatabase(app.mysql_dsn)
+	if err != nil {
+		fmt.Printf("migrate database error: %v\n", err)
+		panic(err)
+	}
 
 	srvErrs := app.Run()
 	for _, err := range srvErrs {

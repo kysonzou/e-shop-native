@@ -35,6 +35,6 @@ const (
 	EventUserLoginNotFound          Event = "user_login_fail_user_not_found"
 
 	// Error Level
-	EventDBUserQueryFailed Event = "db_user_query_failed"
+	EventDBUserQueryFailed  Event = "db_user_query_failed"
 	EventDBUserCreateFailed Event = "db_user_create_failed"
 )

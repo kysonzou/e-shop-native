@@ -5,6 +5,7 @@ package biz
 import (
 	"context"
 	"errors"
+
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
 

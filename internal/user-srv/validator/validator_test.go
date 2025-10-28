@@ -3,9 +3,10 @@ package validator
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	biz "github.com/kyson/e-shop-native/internal/user-srv/biz"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
-	"github.com/stretchr/testify/assert"
 )
 
 // 测试用户名格式

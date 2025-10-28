@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 )
 
 // Data struct definition
@@ -44,7 +45,10 @@ func NewData(s *conf.Data) (*Data, func(), error) {
 	sqlcleanup := func() {
 		sqlDB, err := db.DB()
 		if err == nil {
-			sqlDB.Close()
+			err = sqlDB.Close()
+			if err != nil {
+				panic("关闭 MySql 错误")
+			}
 		}
 	}
 

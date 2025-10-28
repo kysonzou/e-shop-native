@@ -42,7 +42,11 @@ func InitializeApp() (*App, func(), error) {
 		return nil, nil, err
 	}
 	businessGRPCServer := server.NewGRPCServer(confServer, userServiceServer, authAuth, logger)
-	businessHTTPServer := server.NewHTTPServer(confServer, logger)
+	businessHTTPServer, err := server.NewHTTPServer(confServer, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	adminHTTPServer := server.NewAdminServer(confServer)
 	app := NewApp(businessGRPCServer, businessHTTPServer, confServer, confData, logger, adminHTTPServer)
 	return app, func() {

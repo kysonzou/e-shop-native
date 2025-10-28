@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"gorm.io/gorm"
+
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
-	"gorm.io/gorm"
 )
 
 type UserPO struct {

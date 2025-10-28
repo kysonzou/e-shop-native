@@ -13,10 +13,10 @@ import (
 )
 
 const (
-    // AuthorizationHeader is the header name for authorization.
-    AuthorizationHeader = "authorization"
-    // BearerScheme is the prefix for bearer tokens.
-    BearerScheme = "Bearer"
+	// AuthorizationHeader is the header name for authorization.
+	AuthorizationHeader = "authorization"
+	// BearerScheme is the prefix for bearer tokens.
+	BearerScheme = "Bearer"
 )
 
 func AuthInterceptor(a auth.Auth) grpc.UnaryServerInterceptor {

@@ -9,6 +9,7 @@ import (
 
 	//"github.com/kyson/e-shop-native/internal/user-srv/auth"
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/kyson/e-shop-native/internal/user-srv/conf"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
@@ -94,7 +95,7 @@ func TestGetter(t *testing.T) {
 		assert.Equal(t, tt.Algorithm, auth.GetAlgorithm())
 		assert.Equal(t, tt.ExpireDuration, auth.GetExpireDuration())
 		assert.Equal(t, tt.config.Whitelist, auth.GetWhiteList())
-		
+
 	}
 }
 

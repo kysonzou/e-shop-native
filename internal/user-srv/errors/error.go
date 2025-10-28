@@ -1,9 +1,10 @@
 package errors
 
 import (
-	"github.com/kyson/e-shop-native/pkg/code"
 	"google.golang.org/grpc/codes"
+
 	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
+	"github.com/kyson/e-shop-native/pkg/code"
 )
 
 // 通用错误
@@ -16,7 +17,7 @@ var (
 	ErrUserAlreadyExists = code.New(v1.ErrorCode_USER_ALREADY_EXISTS.String(), "用户已存在", codes.AlreadyExists)
 	ErrUserNotFound      = code.New(v1.ErrorCode_USER_NOT_FOUND.String(), "用户不存在", codes.NotFound)
 
-	ErrPasswordIncorrect = code.New(v1.ErrorCode_PASSWORD_INCORRECT.String(), "密码错误",codes.Unauthenticated)
+	ErrPasswordIncorrect = code.New(v1.ErrorCode_PASSWORD_INCORRECT.String(), "密码错误", codes.Unauthenticated)
 )
 
 // 定义认证相关的错误

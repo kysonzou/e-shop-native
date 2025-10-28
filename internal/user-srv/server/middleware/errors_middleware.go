@@ -6,8 +6,10 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
 	"go.uber.org/zap"
+
+	v1 "github.com/kyson/e-shop-native/api/protobuf/user/v1"
+
 	//"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -15,9 +17,9 @@ import (
 // CustomErrorHandle 是一个 grpc-gateway 的错误处理器，
 // 它将 gRPC 错误转换为自定义的 JSON 错误响应。
 
-func CustomErrorHandle (logger *zap.Logger) func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error){
+func CustomErrorHandle(logger *zap.Logger) func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
 
-	return func (ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
+	return func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
 		// 1. 将传入的 error 转换为 gRPC 的 status 对象
 		s := status.Convert(err)
 
@@ -48,14 +50,14 @@ func CustomErrorHandle (logger *zap.Logger) func(ctx context.Context, mux *runti
 
 		// 5. 使用 marshaler 将自定义错误结构序列化为 JSON
 		// 设置响应体数据类型JOSN
-		w.Header().Set("Content-Type", marshaler.ContentType(httpErr)) 
+		w.Header().Set("Content-Type", marshaler.ContentType(httpErr))
 
 		// 设置HTTP status code
 		w.WriteHeader(httpStatus)
-		
+
 		// 使用 marshaler 将我们自定义的 httpErr 结构体序列化成 JSON 字符串，并写入到 HTTP 响应体中。
 		// 这里还考虑如果JOSN序列化失败的回退
-		if err := marshaler.NewEncoder(w).Encode(httpErr); err != nil { 
+		if err := marshaler.NewEncoder(w).Encode(httpErr); err != nil {
 			logger.Error("Failed to marshal and write error response", zap.Error(err))
 			// 如果序列化失败，提供一个最终的回退
 			w.WriteHeader(http.StatusInternalServerError)
@@ -67,5 +69,3 @@ func CustomErrorHandle (logger *zap.Logger) func(ctx context.Context, mux *runti
 		}
 	}
 }
-
-

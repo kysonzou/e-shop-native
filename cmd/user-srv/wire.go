@@ -1,6 +1,6 @@
 //go:build wireinject
 
-//go:generate wire //把上面go:build注释掉就可以使用，但是会冲突
+//go:generate wire //把上面go:build注释掉就可以使用，但是生成的wire_gen.go文件会冲突
 package main
 
 import (

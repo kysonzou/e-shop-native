@@ -1,6 +1,5 @@
 package intercepter_test
 
-
 import (
 	"context"
 	"errors"
@@ -184,6 +183,9 @@ func BenchmarkRecoverInterceptor(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		interceptor(context.Background(), nil, info, handler)
+		_, err := interceptor(context.Background(), nil, info, handler)
+		if err != nil {
+			b.Fatalf("interceptor failed: %v", err)
+		}
 	}
 }

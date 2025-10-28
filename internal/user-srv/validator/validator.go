@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/go-playground/validator/v10"
+
 	"github.com/kyson/e-shop-native/internal/user-srv/biz"
 	apperrors "github.com/kyson/e-shop-native/internal/user-srv/errors"
 )
