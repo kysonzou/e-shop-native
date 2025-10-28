@@ -6,14 +6,14 @@
 *.dylib
 *.test
 *.out
+e-shop-server
+bin/
 
 # 本地环境
 .env
 .envrc.local
 .env.*.local
-
-# 可执行产物
-e-shop-server
+.direnv/
 
 # IDE & 编辑器
 .idea/
@@ -29,11 +29,6 @@ Thumbs.db
 # 日志文件
 *.log
 
-# 临时文件
+# 其它
 tmp/
-third_party/
-bin/
-node_modules/
-# .husky/ 这个文件有钩子的实现，不能忽略
-.direnv/
 GEMINI.md
