@@ -7,6 +7,11 @@
 *.test
 *.out
 
+# 本地环境
+.env
+.envrc.local
+.env.*.local
+
 # 可执行产物
 e-shop-server
 bin/
@@ -27,3 +32,5 @@ Thumbs.db
 
 # 临时文件
 tmp/
+third_party/
+GEMINI.md

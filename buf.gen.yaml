@@ -1,0 +1,18 @@
+version: v1 # 注意：buf.gen.yaml 的版本仍然是 v1
+plugins:
+  - plugin: buf.build/protocolbuffers/go # 使用一个较新的版本
+    out: ./api/protobuf
+    opt:
+      - paths=source_relative
+
+  - plugin: buf.build/grpc/go
+    out: ./api/protobuf
+    opt:
+      - paths=source_relative
+      - generate_unbound_methods=true
+
+  - plugin: buf.build/grpc-ecosystem/gateway
+    out: ./api/protobuf
+    opt:
+      - paths=source_relative
+

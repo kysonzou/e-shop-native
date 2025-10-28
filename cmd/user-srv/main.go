@@ -98,7 +98,6 @@ func (a *Server) Run() []error {
 		if err := a.http_srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			srvErrs = append(srvErrs, fmt.Errorf("HTTP server failed to serve: %w", err))
 		}
-
 	})
 
 	wg.Go(func() {
@@ -130,7 +129,6 @@ func (a *Server) Run() []error {
 		if err := a.admin_srv.Shutdown(ctx); err != nil {
 			srvErrs = append(srvErrs, fmt.Errorf("admin server shutdown error: %w", err))
 		}
-
 	})
 	wg.Wait()
 	return srvErrs
@@ -139,11 +137,9 @@ func (a *Server) Run() []error {
 func init() {
 	//从终端读取config.yaml文件
 	flag.StringVar(&flagconf, "conf", "./configs/config.yaml", "config path, eg: -conf config.yaml")
-
 }
 
 func main() {
-
 	app, cleanup, err := InitializeApp()
 	if err != nil {
 		log.Printf("init app error: %v\n", err)
@@ -162,7 +158,6 @@ func main() {
 		log.Printf("run app error: %v\n", err)
 		panic(err)
 	}
-
 }
 
 func migrateDatabase(dsn string) error {

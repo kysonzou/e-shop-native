@@ -95,7 +95,6 @@ func TestGetter(t *testing.T) {
 		assert.Equal(t, tt.Algorithm, auth.GetAlgorithm())
 		assert.Equal(t, tt.ExpireDuration, auth.GetExpireDuration())
 		assert.Equal(t, tt.config.Whitelist, auth.GetWhiteList())
-
 	}
 }
 

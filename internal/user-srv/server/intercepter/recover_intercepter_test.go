@@ -77,7 +77,6 @@ func TestRecoverInterceptor_Unit(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// 重置日志计数
 			logs.TakeAll()
 

@@ -175,7 +175,6 @@ func TestEmail(t *testing.T) {
 
 // 测试validator错误转换成业务错误
 func TestTranslateValidationError(t *testing.T) {
-
 	type TestUser struct {
 		UserName string `validate:"required,min=3,max=20,username"`
 		Password string `validate:"required,min=8,max=64,password"`

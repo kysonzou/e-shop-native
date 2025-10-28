@@ -20,4 +20,7 @@ import (
 
 	// 代码规范
 	_ "golang.org/x/tools/cmd/goimports"
+
+	// buf 代码生成工具
+	_ "github.com/bufbuild/buf/cmd/buf"
 )

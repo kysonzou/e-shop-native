@@ -18,5 +18,4 @@ func NewAdminServer(c *conf.Server) *AdminHTTPServer {
 		Handler: mux,
 	}
 	return &AdminHTTPServer{Server: http_server}
-
 }

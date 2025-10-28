@@ -23,7 +23,28 @@ linters:
     - unused        # 检测未使用的代码
     - gofmt         # 格式化检查
     - goimports     # import 排序检查
+    - gosec         # 安全性检查
     - misspell      # 拼写检查
+    - structcheck   # 检测未使用的结构体字段
+    - varcheck      # 检测未使用的全局变量
+    - deadcode      # 检测无用代码
+    - typecheck     # 类型检查
+    - nakedret      # 检测裸返回
+    - unconvert     # 检测不必要的类型转换
+    - gocyclo       # 复杂度检查
+    - dupl          # 代码重复检查
+    - bodyclose     # 检查 HTTP 响应体是否关闭
+    - scopelint     # 检测变量作用域问题
+    - exportloopref # 检测循环引用问题
+    - goconst      # 检测常量
+    - lll          # 行长度检查
+    - prealloc     # 检测切片预分配
+    - funlen       # 函数长度检查
+    - exhaustivestruct # 检查结构体字面量是否完整
+    - nestif       # 检测嵌套的 if 语句
+    - whitespace   # 检查多余的空白
+    - unparam      # 检测未使用的函数参数
+
 
 # 检查器设置
 linters-settings:
@@ -35,6 +56,7 @@ linters-settings:
     # 设置你的模块路径，用于 import 分组
     # 请替换成你的实际模块路径
     local-prefixes: github.com/kyson/e-shop-native
+
 
 # 问题报告设置
 issues:

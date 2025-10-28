@@ -1,10 +1,9 @@
-
 syntax = "proto3";
 package user.v1;
+
 option go_package = "github.com/kyson/e-shop/api/protobuf/user/v1;v1";
 
 message UserErr {
-  string code = 1;         
-  string message = 2;  
+  string code = 1;
+  string message = 2;
 }
-

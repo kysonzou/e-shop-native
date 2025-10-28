@@ -18,7 +18,6 @@ import (
 // 它将 gRPC 错误转换为自定义的 JSON 错误响应。
 
 func CustomErrorHandle(logger *zap.Logger) func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
-
 	return func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error) {
 		// 1. 将传入的 error 转换为 gRPC 的 status 对象
 		s := status.Convert(err)

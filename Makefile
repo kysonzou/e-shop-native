@@ -24,6 +24,7 @@ MOCKGEN_PATH            := $(TOOLS_BIN_DIR)/mockgen
 WIRE_PATH               := $(TOOLS_BIN_DIR)/wire
 GOLANGCI_LINT_PATH      := $(TOOLS_BIN_DIR)/golangci-lint
 GOIMPORTS_PATH          := $(TOOLS_BIN_DIR)/goimports
+BUF_PATH                := $(TOOLS_BIN_DIR)/buf
 
 
 
@@ -31,7 +32,8 @@ GOIMPORTS_PATH          := $(TOOLS_BIN_DIR)/goimports
 # 当运行 `make tools` 或任何依赖它的目标时，make 会检查每个工具文件是否存在
 # 如果某个文件不存在，make 就会查找并执行对应的安装规则
 .PHONY: tools
-tools: $(PROTOC_GEN_GO_PATH) $(PROTOC_GEN_GO_GRPC_PATH) $(PROTOC_GEN_GATEWAY_PATH) $(MOCKGEN_PATH) $(WIRE_PATH) $(GOLANGCI_LINT_PATH) $(GOIMPORTS_PATH)
+tools: $(PROTOC_GEN_GO_PATH) $(PROTOC_GEN_GO_GRPC_PATH) $(PROTOC_GEN_GATEWAY_PATH) $(MOCKGEN_PATH) $(WIRE_PATH) $(GOLANGCI_LINT_PATH) $(GOIMPORTS_PATH)\
+	   $(BUF_PATH)
 	@echo ">> All tools are installed and up to date."
 
 # 每个工具的安装规则
@@ -66,6 +68,10 @@ $(GOIMPORTS_PATH): go.mod tools.go
 	@echo ">> Installing goimports..."
 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install golang.org/x/tools/cmd/goimports
 
+$(BUF_PATH): go.mod tools.go
+	@echo ">> Installing buf..."
+	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/bufbuild/buf/cmd/buf
+
 # ====================================================================================
 # 主要开发流程 (Main Development Workflow)
 # ====================================================================================
@@ -96,15 +102,15 @@ test:
 # ====================================================================================
 
 # Generate code from proto files
-.PHONY: api
-api: tools
-	@echo ">> Generating api code from proto..."
-	@protoc -I. -I./third_party \
-	       --go_out=. --go_opt=paths=source_relative \
-	       --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-	       --grpc-gateway_out=. --grpc-gateway_opt=paths=source_relative \
-	       $(API_PROTO_FILES)
-	@echo "<< API code generated."
+# .PHONY: api
+# api: tools
+# 	@echo ">> Generating api code from proto..."
+# 	@protoc -I. -I./third_party \
+# 	       --go_out=. --go_opt=paths=source_relative \
+# 	       --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+# 	       --grpc-gateway_out=. --grpc-gateway_opt=paths=source_relative \
+# 	       $(API_PROTO_FILES)
+# 	@echo "<< API code generated."
 
 # Generate dependency injection code with Wire
 .PHONY: wire
@@ -146,6 +152,41 @@ lint-fix: tools format
 	@echo ">> Running linter with auto-fix..."
 	@$(GOLANGCI_LINT_PATH) run --fix ./...
 	@echo "<< Auto-fix completed."
+
+# ====================================================================================
+# Protobuf
+# ====================================================================================
+# 生成API代码
+.PHONY: api
+api:
+	@echo ">> Generating api code with Buf..."
+	@$(BUF_PATH) generate
+	@echo "<< API code generated."
+
+# 运行proto文件的lint检查
+.PHONY: proto-lint
+proto-lint:
+	@echo ">> Linting proto files..."
+	@$(BUF_PATH) lint
+	@echo "<< Proto files linted."
+# 格式化proto文件
+.PHONY: proto-format
+proto-format:
+	@echo ">> Formatting proto files..."
+	@$(BUF_PATH) format -w
+	@echo "<< Proto files formatted."
+# 更新proto依赖
+.PHONY: proto-dep-update
+proto-dep-update:
+	@echo ">> Updating proto dependencies..."
+	@$(BUF_PATH) dep update
+	@echo "<< Proto dependencies updated in buf.lock."
+# 初始化buf配置
+.PHONY: buf-config-init
+buf-config-init:
+	@echo ">> Initializing buf configuration..."
+	@$(BUF_PATH) config init
+	@echo "<< Buf configuration initialized."
 
 
 # ====================================================================================
@@ -190,6 +231,10 @@ help:
 	@echo "  api           Generate Go code from .proto files"
 	@echo "  wire          Generate Go dependency injection code"
 	@echo "  mock          Generate mock code for interfaces"
+	@echo "  proto-lint    Lint .proto files using Buf"
+	@echo "  proto-format  Format .proto files using Buf"
+	@echo "  proto-dep-update  Update proto dependencies in buf.lock"
+	@echo "  buf-config-init   Initialize Buf configuration file"
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  format        Format all Go code in the project"
