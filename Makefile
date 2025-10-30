@@ -5,7 +5,7 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME=e-shop-server
-API_PROTO_FILES=$(shell find api/protobuf -name *.proto)
+#API_PROTO_FILES=$(shell find api/protobuf -name *.proto)
 
 # ====================================================================================
 # 工具链管理 (Toolchain Management)
@@ -17,9 +17,9 @@ TOOLS_BIN_DIR := $(CURDIR)/bin
 export PATH := $(TOOLS_BIN_DIR):$(PATH)
 
 # 声明每个工具的最终二进制文件路径
-PROTOC_GEN_GO_PATH      := $(TOOLS_BIN_DIR)/protoc-gen-go
-PROTOC_GEN_GO_GRPC_PATH := $(TOOLS_BIN_DIR)/protoc-gen-go-grpc
-PROTOC_GEN_GATEWAY_PATH := $(TOOLS_BIN_DIR)/protoc-gen-grpc-gateway
+# PROTOC_GEN_GO_PATH      := $(TOOLS_BIN_DIR)/protoc-gen-go
+# PROTOC_GEN_GO_GRPC_PATH := $(TOOLS_BIN_DIR)/protoc-gen-go-grpc
+# PROTOC_GEN_GATEWAY_PATH := $(TOOLS_BIN_DIR)/protoc-gen-grpc-gateway
 MOCKGEN_PATH            := $(TOOLS_BIN_DIR)/mockgen
 WIRE_PATH               := $(TOOLS_BIN_DIR)/wire
 GOLANGCI_LINT_PATH      := $(TOOLS_BIN_DIR)/golangci-lint
@@ -32,7 +32,7 @@ BUF_PATH                := $(TOOLS_BIN_DIR)/buf
 # 当运行 `make tools` 或任何依赖它的目标时，make 会检查每个工具文件是否存在
 # 如果某个文件不存在，make 就会查找并执行对应的安装规则
 .PHONY: tools
-tools: $(PROTOC_GEN_GO_PATH) $(PROTOC_GEN_GO_GRPC_PATH) $(PROTOC_GEN_GATEWAY_PATH) $(MOCKGEN_PATH) $(WIRE_PATH) $(GOLANGCI_LINT_PATH) $(GOIMPORTS_PATH)\
+tools: $(MOCKGEN_PATH) $(WIRE_PATH) $(GOLANGCI_LINT_PATH) $(GOIMPORTS_PATH)\
 	   $(BUF_PATH)
 	@echo ">> All tools are installed and up to date."
 
@@ -40,35 +40,35 @@ tools: $(PROTOC_GEN_GO_PATH) $(PROTOC_GEN_GO_GRPC_PATH) $(PROTOC_GEN_GATEWAY_PAT
 # 目标是二进制文件路径，前提条件是 go.mod 和 tools.go
 # 这意味着如果 go.mod/tools.go 更新了，或者二进制文件不存在，此规则就会被触发
 # GOBIN=$(TOOLS_BIN_DIR) 指定了 `go install` 的安装目录
-$(PROTOC_GEN_GO_PATH): go.mod tools.go
-	@echo ">> Installing protoc-gen-go (version from go.mod)..."
-	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install google.golang.org/protobuf/cmd/protoc-gen-go
+# $(PROTOC_GEN_GO_PATH): go.mod tools.go
+# 	@echo ">> Installing protoc-gen-go (version from go.mod)..."
+# 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install google.golang.org/protobuf/cmd/protoc-gen-go
 
-$(PROTOC_GEN_GO_GRPC_PATH): go.mod tools.go
-	@echo ">> Installing protoc-gen-go-grpc..."
-	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+# $(PROTOC_GEN_GO_GRPC_PATH): go.mod tools.go
+# 	@echo ">> Installing protoc-gen-go-grpc..."
+# 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
-$(PROTOC_GEN_GATEWAY_PATH): go.mod tools.go
-	@echo ">> Installing protoc-gen-grpc-gateway..."
-	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+# $(PROTOC_GEN_GATEWAY_PATH): go.mod tools.go
+# 	@echo ">> Installing protoc-gen-grpc-gateway..."
+# 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 
-$(MOCKGEN_PATH): go.mod tools.go
+$(MOCKGEN_PATH): go.mod ./tools/tools.go
 	@echo ">> Installing mockgen..."
 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/golang/mock/mockgen
 
-$(WIRE_PATH): go.mod tools.go
+$(WIRE_PATH): go.mod ./tools/tools.go
 	@echo ">> Installing wire..."
 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/google/wire/cmd/wire
 
-$(GOLANGCI_LINT_PATH): go.mod tools.go
+$(GOLANGCI_LINT_PATH): go.mod ./tools/tools.go
 	@echo ">> Installing golangci-lint..."
 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/golangci/golangci-lint/cmd/golangci-lint
 
-$(GOIMPORTS_PATH): go.mod tools.go
+$(GOIMPORTS_PATH): go.mod ./tools/tools.go
 	@echo ">> Installing goimports..."
 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install golang.org/x/tools/cmd/goimports
 
-$(BUF_PATH): go.mod tools.go
+$(BUF_PATH): go.mod ./tools/tools.go
 	@echo ">> Installing buf..."
 	@GOBIN=$(TOOLS_BIN_DIR) $(GOCMD) install github.com/bufbuild/buf/cmd/buf
 
@@ -221,8 +221,8 @@ uninstall-hooks:
 version: tools
 	@echo ">> Checking tool versions:"
 	@echo "-------------------------"
-	@echo -n "protoc-gen-go:       "; $(PROTOC_GEN_GO_PATH) --version
-	@echo -n "protoc-gen-go-grpc:  "; $(PROTOC_GEN_GO_GRPC_PATH) --version
+# 	@echo -n "protoc-gen-go:       "; $(PROTOC_GEN_GO_PATH) --version
+# 	@echo -n "protoc-gen-go-grpc:  "; $(PROTOC_GEN_GO_GRPC_PATH) --version
 	@echo -n "wire:                "; $(WIRE_PATH) --version
 	@echo -n "mockgen:             "; $(MOCKGEN_PATH) --version
 	@echo -n "golangci-lint:       "; $(GOLANGCI_LINT_PATH) --version

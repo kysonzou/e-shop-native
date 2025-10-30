@@ -1,4 +1,7 @@
-version: v1 # 注意：buf.gen.yaml 的版本仍然是 v1
+
+# Protocalbuf 代码生成的相关的工具，buf工具平台给它们整个并且管理，如果开启managed mode，可以锁定版本
+# 如果不使用buf的话，则需要手动安装这些工具，比如 go install....
+version: v1
 plugins:
   - plugin: buf.build/protocolbuffers/go # 使用一个较新的版本
     out: ./api/protobuf
@@ -9,10 +12,9 @@ plugins:
     out: ./api/protobuf
     opt:
       - paths=source_relative
-      - generate_unbound_methods=true
 
   - plugin: buf.build/grpc-ecosystem/gateway
     out: ./api/protobuf
     opt:
       - paths=source_relative
-
+  

@@ -6,7 +6,6 @@ deps:
   - buf.build/googleapis/googleapis
 
 # 'modules' 定义了当前仓库中包含的 Protobuf 模块的路径。
-# 对于大多数项目，这里只有一个模块。
 modules:
   - path: api/protobuf
     # 'name' 定义了你在 BSR 上的模块全名。
@@ -23,22 +22,22 @@ breaking:
     - FILE
 
   # **新增 Managed Mode 配置**
-managed:
-  enabled: true
-  # # 我们可以在这里覆盖或指定 go_package 前缀等,可以简化.proto文件中的go_package定义暂不开启
-  # go_package_prefix:
-  #   default: github.com/your-username/e-shop-native # 确保与 go.mod 一致
-  #   except:
-  #     - buf.build/googleapis/googleapis # google 的库不需要加我们的前缀
+# managed:
+#   enabled: true
+#   # 我们可以在这里覆盖或指定 go_package 前缀等,可以简化.proto文件中的go_package定义暂不开启
+#   go_package_prefix:
+#     default: github.com/your-username/e-shop-native # 确保与 go.mod 一致
+#     except:
+#       - buf.build/googleapis/googleapis # google 的库不需要加我们的前缀
   
-  # # **核心：锁定插件版本**
-  # plugins:
-  #   # 声明我们项目中使用的 protoc-gen-go 插件的版本
-  #   - plugin: buf.build/protocolbuffers/go
-  #     version: "v1.31.0" # 在这里明确指定版本！
-  #   # 声明 go-grpc 插件的版本
-  #   - plugin: buf.build/grpc/go
-  #     version: "v1.3.0"
-  #   # 声明 grpc-gateway 插件的版本
-  #   - plugin: buf.build/grpc-ecosystem/gateway
-  #     version: "v2.14.3"
+#   # **核心：锁定插件版本**
+#   plugins:
+#     # 声明我们项目中使用的 protoc-gen-go 插件的版本
+#     - plugin: buf.build/protocolbuffers/go
+#       version: "v1.31.0" # 在这里明确指定版本！
+#     # 声明 go-grpc 插件的版本
+#     - plugin: buf.build/grpc/go
+#       version: "v1.3.0"
+#     # 声明 grpc-gateway 插件的版本
+#     - plugin: buf.build/grpc-ecosystem/gateway
+#       version: "v2.14.3"

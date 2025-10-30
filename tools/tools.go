@@ -11,9 +11,9 @@ import (
 	_ "github.com/google/wire/cmd/wire"
 
 	// grpc-gateway 和 protobuf 相关工具
-	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway"
-	_ "google.golang.org/grpc/cmd/protoc-gen-go-grpc"
-	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
+	// _ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway"
+	// _ "google.golang.org/grpc/cmd/protoc-gen-go-grpc"
+	// _ "google.golang.org/protobuf/cmd/protoc-gen-go"
 
 	// 代码质量检查工具
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
